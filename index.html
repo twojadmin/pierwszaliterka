@@ -215,6 +215,19 @@ body.lapmode .lapHud{display:flex}
 .dg.p.ok,.dg.p.fix{width:auto; overflow:visible; height:auto; margin:0; padding:0; vertical-align:baseline; line-height:inherit}
 .dg.p.none{width:0; height:0; margin:0; padding:0; border:0; overflow:hidden}
 .dg.bad{animation:nudge .4s}
+.dtext.done .dw.key{font-weight:800; color:#1F5FAD}
+.dtext.done .dg.p.ok,.dtext.done .dg.p.fix{font-weight:900; color:#1F5FAD}
+.dg.p.fix{text-decoration:underline wavy #F08A3C; text-underline-offset:.22em}
+.blocks.dyktEnd{display:block; max-width:760px}
+.dbanner{display:flex; align-items:center; gap:8px 16px; flex-wrap:wrap; justify-content:center; background:var(--card); border-radius:24px; padding:10px 18px;
+  box-shadow:0 8px 0 rgba(36,50,74,.08), 0 16px 30px rgba(36,50,74,.12); animation:cardIn .5s cubic-bezier(.3,1.5,.5,1)}
+.dbFaces{font-size:clamp(28px,7vw,40px); line-height:1}
+@media (max-width:600px){ .dbanner{padding:8px 12px; gap:6px 10px} .dbFaces{font-size:24px} .dbText{flex-basis:200px} .dbText span{font-size:14px} }
+.dbText{display:grid; gap:0; flex:1 1 220px; min-width:0}
+.dbText b{font-size:clamp(20px,5vw,28px); line-height:1.2; color:var(--tomato)}
+.dbText span{font-size:16px; color:var(--muted); line-height:1.3}
+.dbBtns{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
+.dbBtns .pill.dbNext{background:var(--teal); color:#fff; box-shadow:0 4px 0 #136B68}
 .dw.flash{animation:wordOk .9s ease-out}
 .dw.err{text-decoration:underline wavy #F08A3C; text-decoration-thickness:2px; text-underline-offset:.22em}
 @keyframes wordOk{0%{background:#C9F0D6; box-shadow:0 0 0 3px #C9F0D6}100%{background:transparent; box-shadow:0 0 0 3px transparent}}
@@ -2189,7 +2202,7 @@ function buildDykt(d){
         let opts = p.opts ? shuffle(p.opts.slice()) : DK_PAIRS[p.gap.toLowerCase()].slice();
         opts = opts.map(o => capFirst(o, up));
         const g = mkGap("o", p.gap, opts, wEl);
-        wEl.appendChild(g.el); wEl.classList.add("need");
+        wEl.appendChild(g.el); wEl.classList.add("need", "key");
       });
       lastWord = wEl; lastWasWord = true; return;
     }
@@ -2340,20 +2353,29 @@ function dkFinish(){
   dk.done = true; dkMarkSentences();
   $("dykt").querySelectorAll(".cur").forEach(e => e.classList.remove("cur"));
   $("dykt").classList.add("done");
-  $("blocks").innerHTML = "";
-  const n = dk.gaps.length, e = dk.errors, pct = e / n;
-  const [faces, grade] = e === 0 ? ["⭐🏆⭐", "Bezbłędnie – celująco!"] : pct <= 0.05 ? ["⭐⭐⭐", "Bardzo dobrze!"] : pct <= 0.12 ? ["⭐⭐", "Dobrze!"] : pct <= 0.25 ? ["⭐", "Nieźle, poćwicz jeszcze."] : ["💪", "Spróbuj jeszcze raz!"];
-  const words = [...new Set(dk.gaps.filter(g => g.miss && g.kind === "o").map(g => g.wordEl.textContent))];
-  const punctErr = dk.gaps.filter(g => g.miss && g.kind === "p").length;
-  $("endFaces").textContent = faces;
-  $("endTitle").textContent = grade;
-  let html = `Dyktando <b>„${esc(dk.d.title)}”</b>: ${n - e} z ${n} miejsc dobrze za pierwszym razem.`;
-  if (words.length) html += `<br><span class="mistakes">Popraw: <b>${words.map(esc).join(", ")}</b></span>`;
-  if (punctErr) html += `<br><span class="mistakes">Błędy w przecinkach: <b>${punctErr}</b></span>`;
-  $("endText").innerHTML = html;
-  $("endScreen").hidden = false;
   dkStopSpeak();
-  if (pct <= 0.12){ fireworksShow(); balloons(); } else starBurst(W/2, H/3);
+  const n = dk.gaps.length, e = dk.errors, pct = e / n;
+  const [faces, grade] = e === 0 ? ["🏆", "Bezbłędnie – celująco!"] : pct <= 0.05 ? ["⭐⭐⭐", "Bardzo dobrze!"] : pct <= 0.12 ? ["⭐⭐", "Dobrze!"] : pct <= 0.25 ? ["⭐", "Nieźle, poćwicz jeszcze."] : ["💪", "Spróbuj jeszcze raz!"];
+  const wordErr = new Set(dk.gaps.filter(g => g.miss && g.kind === "o").map(g => g.wordEl)).size;
+  const punctErr = dk.gaps.filter(g => g.miss && g.kind === "p").length;
+  let info = `Dobrze za pierwszym razem: ${n - e} z ${n}.`;
+  if (e) info += ` Błędy: ${[wordErr && `w słowach ${wordErr}`, punctErr && `w przecinkach ${punctErr}`].filter(Boolean).join(", ")}${wordErr ? " – podkreślone w tekście" : ""}.`;
+  /* baner z wynikiem pod tekstem – dyktando zostaje widoczne */
+  const list = dkAll(), next = list[(list.findIndex(x => x.id === dk.d.id) + 1) % list.length];
+  const blocks = $("blocks");
+  blocks.className = "blocks dyktEnd"; blocks.setAttribute("aria-label", "Wynik dyktanda");
+  blocks.innerHTML = `<div class="dbanner" role="status">
+      <div class="dbFaces" aria-hidden="true">${faces}</div>
+      <div class="dbText"><b>${esc(grade)}</b><span>${esc(info)}</span></div>
+      <div class="dbBtns">
+        <button class="pill" type="button" id="dkAgain">↻ Jeszcze raz</button>
+        ${list.length > 1 ? `<button class="pill dbNext" type="button" id="dkNext">Następne ➜</button>` : ""}
+      </div>
+    </div>`;
+  $("dkAgain").addEventListener("click", () => { soundTap(); startDykt(); });
+  $("dkNext")?.addEventListener("click", () => { soundTap(); dkSel = next.id; store.set("dyktSel", dkSel); startDykt(); });
+  $("dykt").scrollTo({top:0, behavior: reduced ? "auto" : "smooth"});
+  if (pct <= 0.12){ fireworksShow(); } else starBurst(W/2, H/3);
   run();
   if (ctx){ const t = ctx.currentTime; [60,64,67,72,76,79,84].forEach((m,i) => tone(mtof(m), t+i*0.1, 0.8, {type:"triangle", vol:0.2})); }
 }
