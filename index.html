@@ -189,6 +189,53 @@ body.lapmode .lapHud{display:flex}
 .play:active{transform:translateY(6px); box-shadow:inset 0 0 0 5px rgba(255,255,255,.3), 0 2px 0 #B9432A}
 .note{font-size:15px !important}
 
+/* ---------- Dyktando ---------- */
+.level.dykt{background:var(--teal); box-shadow:inset 0 0 0 5px rgba(255,255,255,.3), 0 7px 0 #136B68}
+.dtext{
+  display:none; width:100%; max-height:100%; box-sizing:border-box; overflow-y:auto; overscroll-behavior:contain;
+  background:var(--card); border-radius:28px; padding:clamp(14px,3vw,26px) clamp(16px,4vw,32px);
+  font-size:clamp(18px,4.2vw,25px); line-height:2.05; font-weight:500; white-space:pre-wrap; overflow-wrap:break-word;
+  box-shadow:0 10px 0 rgba(36,50,74,.08), 0 22px 44px rgba(36,50,74,.14);
+}
+.dtext h2{margin:0 0 4px; font-size:1.15em; line-height:1.3; color:var(--teal); white-space:normal}
+.dw{border-radius:8px; transition:background .25s; white-space:nowrap}
+.dw.cur{background:#DCEBFF; box-shadow:0 0 0 3px #DCEBFF}
+.dg{display:inline-block; vertical-align:baseline; box-sizing:border-box; text-align:center; line-height:1.25; border-radius:7px; transition:background .2s, border-color .2s, min-width .3s, margin .3s}
+.dg.o{min-width:1.05em; padding:0 .08em; border:2px dashed #B9C3D3; color:transparent}
+.dg.o:empty::before{content:"_"}
+.dg.p{min-width:.62em; height:1.05em; margin:0 .06em; border:2px dashed #C9D2DF; vertical-align:-.12em; line-height:.95}
+.dg.cur{border:3px solid var(--sea); background:#FFE58A; animation:dgPulse 1.1s ease-in-out infinite}
+.dg.ok{border:0; color:var(--good); background:var(--good-bg)}
+.dg.fix{border:0; color:#C2410C; background:#FFE7D6}
+.dg.p.ok,.dg.p.fix{min-width:0; height:auto; margin:0; padding:0 .05em; vertical-align:baseline; line-height:inherit; font-weight:800}
+.dg.p.none{min-width:0; width:0; height:0; margin:0; padding:0; border:0; overflow:hidden}
+.dg.bad{animation:nudge .4s}
+.dtext.done .dg.ok,.dtext.done .dg.p.ok{background:none}
+@keyframes dgPulse{50%{background:#FFD54A}}
+.dyktHud{display:none; gap:6px; flex-wrap:wrap; font-variant-numeric:tabular-nums}
+.dyktHud .pill{cursor:default}
+body.dyktmode .card, body.dyktmode .stars{display:none}
+body.dyktmode .dtext{display:block}
+body.dyktmode .app{grid-template-columns:minmax(0,1fr)}
+body.dyktmode .stage{min-width:0; align-items:stretch}
+body.dyktmode .dyktHud{display:flex}
+.blocks.dykt{grid-template-columns:repeat(auto-fit, minmax(58px, 92px)); justify-content:center; max-width:760px}
+.blocks.dykt .block{font-size:clamp(26px,min(7vw,5vh),46px)}
+.blocks.dykt .block.word{font-size:clamp(15px,min(4vw,3vh),22px)}
+.dsel{border:0; background:var(--card); border-radius:999px; padding:6px 12px; font:700 16px var(--display); color:var(--ink); max-width:100%; box-shadow:0 3px 0 rgba(36,50,74,.12); cursor:pointer}
+.panel.wide{max-width:640px; text-align:left; align-items:stretch; max-height:calc(100vh - 32px); overflow-y:auto}
+.panel.wide h1{font-size:clamp(30px,7vw,42px); text-align:center}
+.panel.wide p{max-width:none; font-size:16px}
+.panel input,.panel textarea{font:500 17px var(--display); color:var(--ink); border:3px solid #D5DDE8; border-radius:16px; padding:8px 12px; box-sizing:border-box; width:100%; user-select:text; -webkit-user-select:text; background:#fff}
+.panel textarea{min-height:200px; resize:vertical; line-height:1.5}
+.panel input:focus,.panel textarea:focus{outline:none; border-color:var(--sea)}
+.panel .row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap}
+.panel .play.small{font-size:26px; padding:8px 28px 4px; animation:none}
+.panel .play.grey{background:#B9C3D3; box-shadow:inset 0 0 0 5px rgba(255,255,255,.3), 0 8px 0 #8C97A8}
+.panel code{background:#EEF4FB; border-radius:6px; padding:0 5px}
+.mistakes{font-size:18px !important; color:var(--ink) !important}
+@media (max-width:600px){ .blocks.dykt{grid-template-columns:repeat(auto-fit, minmax(48px, 76px)); gap:8px} .blocks.dykt .block{font-size:28px; border-radius:16px} .blocks.dykt .block.word{font-size:14px} }
+
 @media (max-height:700px){ .pic{font-size:clamp(64px,18vh,130px)} }
 @media (max-height:560px){ .pic{font-size:clamp(56px,15vh,110px)} .word{font-size:34px} .block{font-size:44px} }
 @media (prefers-reduced-motion:reduce){
@@ -216,10 +263,24 @@ body.lapmode .lapHud{display:flex}
       <span class="pill" title="Owoce i warzywa na talerzu">🍎 <span id="lapLeft">12</span></span>
       <span class="pill" title="Ile razy łapki dostały po łapkach">👋 <span id="lapSlaps">0</span></span>
     </div>
+    <div class="dyktHud">
+      <span class="pill" title="Uzupełnione miejsca">✏️ <span id="dkDone">0</span>/<span id="dkAll">0</span></span>
+      <span class="pill" title="Błędy">❌ <span id="dkErr">0</span></span>
+    </div>
     <div class="pilkHud">
       <span class="pill" title="Gole">⚽ <span id="pkGoals">0</span>/10</span>
       <span class="pill" title="Strzały">🥅 <span id="pkShots">0</span></span>
       <span class="pill" title="Obrony bramkarza">🧤 <span id="pkSaves">0</span></span>
+    </div>
+    <div class="mathbar" id="dyktbar" hidden>
+      <select class="dsel" id="dkSelect" aria-label="Wybierz dyktando"></select>
+      <div class="seg" role="group" aria-label="Co ćwiczymy">
+        <button type="button" data-dk="orto">ó · rz · ch</button>
+        <button type="button" data-dk="punkt">, . ? !</button>
+      </div>
+      <button class="pill" id="dkAddBtn" type="button">＋ Własne</button>
+      <button class="pill" id="dkDelBtn" type="button" title="Usuń to dyktando" hidden>🗑</button>
+      <button class="pill" id="dkRestart" type="button">↻ Od nowa</button>
     </div>
     <div class="mathbar" id="pilkbar" hidden>
       <div class="seg" role="group" aria-label="Bramkarz">
@@ -267,6 +328,7 @@ body.lapmode .lapHud{display:flex}
   </header>
 
   <section class="stage">
+    <div class="dtext" id="dykt" aria-live="polite"></div>
     <div class="picnic" id="picnic" aria-hidden="true"></div>
     <canvas class="pitch" id="pitch" aria-label="Boisko: dotknij bramki, żeby wycelować, i puść, żeby strzelić"></canvas>
     <div class="card" id="card">
@@ -286,6 +348,7 @@ body.lapmode .lapHud{display:flex}
     <div class="levels">
       <button class="level" id="playBtn" type="button"><b>Literki</b><span>od 5 lat · znajdź pierwszą literę słowa</span></button>
       <button class="level orto" id="orthoBtn" type="button"><b>Ortografia</b><span>od 11 lat · ó czy u, rz czy ż, ch czy h</span></button>
+      <button class="level dykt" id="dyktBtn" type="button"><b>Dyktando</b><span>od 9 lat · ortografia i przecinki w tekście</span></button>
       <button class="level mat" id="mathBtn" type="button"><b>Matematyka</b><span>dodawanie i odejmowanie, od 20 do 1000</span></button>
       <button class="level pilk" id="pilkBtn" type="button"><b>Piłkomat</b><span>rzuty karne – strzel 10 goli!</span></button>
       <button class="level lap" id="lapBtn" type="button"><b>Łapkomat</b><span>łapki kradną owoce – daj im po łapkach!</span></button>
@@ -301,6 +364,21 @@ body.lapmode .lapHud{display:flex}
     <p id="endText">Masz <b>10 gwiazdek</b>. Jesteś mistrzem literek!</p>
     <button class="play" id="againBtn" type="button">Jeszcze raz!</button>
   </div>
+</div>
+
+<div class="overlay" id="dkAddScreen" hidden>
+  <form class="panel wide" id="dkForm">
+    <h1>Nowe dyktando</h1>
+    <input id="dkTitle" maxlength="60" placeholder="Tytuł, np. Wycieczka do lasu" required>
+    <textarea id="dkText" placeholder="Wklej albo wpisz tekst dyktanda…" required></textarea>
+    <p>Trudne miejsca (<b>ó/u, rz/ż, ch/h</b>) oraz znaki <b>, . ? ! : –</b> zostaną wykryte same.
+      Możesz też samodzielnie zaznaczyć trudne miejsca w nawiasach kwadratowych – wtedy ćwiczone będą tylko one:
+      <code>g[ó]ra</code>, <code>[rz]eka</code>, <code>pi[ę]kny</code> albo z własnymi podpowiedziami: <code>ksi[ą/om]żka</code> (pierwsza odpowiedź jest poprawna).</p>
+    <div class="row">
+      <button class="play small grey" type="button" id="dkCancel">Anuluj</button>
+      <button class="play small" type="submit">Zapisz</button>
+    </div>
+  </form>
 </div>
 
 <canvas id="fx"></canvas>
@@ -899,7 +977,7 @@ let peekTimer = null;
 function schedulePeek(){
   clearTimeout(peekTimer);
   peekTimer = setTimeout(() => {
-    if ($("startScreen").hidden && $("endScreen").hidden && mode !== "lap" && mode !== "pilk"){
+    if ($("startScreen").hidden && $("endScreen").hidden && mode !== "lap" && mode !== "pilk" && mode !== "dykt"){
       const r = Math.random();
       if (r < 0.55) spawnPaw({edges:["left","right","top"], dur:rand(3000,4200), sound:false});
       else if (r < 0.72) spawnBalloon(rand(40, W-40), H + 40);
@@ -2001,6 +2079,266 @@ async function answer(btn, letter){
     if (misses >= 2) [...$("blocks").children].find(b => b.textContent === current.letter)?.classList.add("hint");
   }
 }
+
+/* ---------- Dyktando: zaznaczenie przesuwa się po tekście, w każdym miejscu wybieramy pisownię albo znak ---------- */
+const DYKT_PRESETS = [
+  {id:"lucja", title:"Łucja i szafa", text:
+"Kiedy zajrzała do środka, zobaczyła rząd wiszących płaszczy. Były to przeważnie futra, a trzeba wam wiedzieć, że dla Łucji nie było nic milszego nad zapach i dotyk futer. Nie wahając się ani chwili, weszła do szafy i zanurzyła się w futrach, z rozkoszą wtulając w nie twarz. Oczywiście nie zapomniała o pozostawieniu otwartych drzwi, ponieważ wiedziała, że to bardzo głupio przypadkowo zamknąć się w szafie.\nNagle zauważyła, że coś skrzypi pod jej nogami. To chyba kulki naftaliny, pomyślała i schyliła się, chcąc namacać je ręką."},
+  {id:"wrozka", title:"Wróżka i chochlik", text:
+"Na skraju lasu, pod starym dębem, mieszkała wróżka Różyczka. Codziennie rano budziła się razem z ptakami, wkładała różowy płaszczyk i ruszała na obchód. Sprawdzała, czy żuczki wróciły do domu, czy jeże mają dość suchych liści i czy nikt nie hałasuje nad strumykiem. Pewnego dnia usłyszała chichot dochodzący z krzaków. Ktoś tam był! Ostrożnie rozchyliła gałązki i zobaczyła małego chochlika, który próbował ukryć słoik pełen orzechów.\n– Co tu robisz? – zapytała surowo.\n– Chciałem tylko zrobić zapasy na zimę – wyjąkał chochlik i zarumienił się po same uszy."},
+  {id:"burza", title:"Burza nad jeziorem", text:
+"Było gorące, duszne popołudnie. Nad jeziorem krążyły jaskółki, a w trzcinach głośno rechotały żaby. Nagle niebo pociemniało i zerwał się porywisty wiatr. Rybacy szybko wyciągnęli łódki na brzeg, a dzieci pobiegły schronić się pod dachem starej chaty. Po chwili usłyszeliśmy pierwszy grzmot. Huk był tak potężny, że aż zadrżały szyby! Deszcz lunął jak z cebra, a błyskawice rozświetlały ciemne chmury. Na szczęście burza szybko minęła. Kiedy wyszliśmy na dwór, powietrze pachniało świeżością, a nad wodą pojawiła się ogromna, kolorowa tęcza."},
+];
+const DK_PAIRS = {"ó":["ó","u"], "u":["ó","u"], "rz":["rz","ż"], "ż":["rz","ż"], "ch":["ch","h"], "h":["ch","h"],
+  "ą":["ą","om","on"], "ę":["ę","em","en"], "ź":["ź","ż","zi"], "ś":["ś","si"], "ć":["ć","ci"], "ń":["ń","ni"]};
+const DK_MARKS = [",", ".", "!", "?", ":", "–"];
+const DK_GAPPABLE = /^[,.!?:;…–—]+$/;
+const WORD_RE = /(?:\p{L}|\[[^\]\n]*\])+/gu;
+let dkCustom = store.get("dyktCustom", []), dkSel = store.get("dyktSel", "lucja"), dkKinds = store.get("dyktKinds", ["orto","punkt"]);
+let dk = null;
+
+const dkAll = () => [...DYKT_PRESETS, ...dkCustom];
+const capFirst = (t, up) => up ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+const esc = t => t.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* automatyczne wyszukiwanie trudnych miejsc w słowie: ó/u, rz/ż, ch/h */
+function autoGaps(w){
+  const out = [], lw = w.toLowerCase();
+  let txt = "";
+  for (let i = 0; i < w.length; ){
+    const two = lw.slice(i, i+2);
+    let g = null;
+    if (two === "rz" || two === "ch") g = w.slice(i, i+2);
+    else if ("óuh".includes(lw[i]) || (lw[i] === "ż" && lw[i-1] !== "d")) g = w[i];
+    if (g){ if (txt) out.push(txt); txt = ""; out.push({gap:g}); i += g.length; }
+    else { txt += w[i]; i++; }
+  }
+  if (txt) out.push(txt);
+  return out;
+}
+/* ręczne zaznaczenia: g[ó]ra albo ksi[ą/om]żka */
+function manualGaps(w){
+  return w.split(/(\[[^\]]*\])/).filter(Boolean).map(part => {
+    if (part[0] !== "[") return part;
+    const inner = part.slice(1, -1), alts = inner.split("/").filter(Boolean);
+    if (!alts.length) return "";
+    if (alts.length > 1) return {gap:alts[0], opts:alts};
+    return DK_PAIRS[alts[0].toLowerCase()] ? {gap:alts[0]} : alts[0];
+  }).filter(Boolean);
+}
+
+/* budowanie tekstu z luk; luki trzymamy w kolejności czytania */
+function buildDykt(d){
+  const text = d.text.replace(/\r/g, "").replace(/\.\.\./g, "…").replace(/—/g, "–");
+  const manual = text.includes("[");
+  const orto = dkKinds.includes("orto"), punkt = dkKinds.includes("punkt");
+  const root = $("dykt"); root.innerHTML = ""; root.classList.remove("done");
+  const h = document.createElement("h2"); h.textContent = d.title; root.appendChild(h);
+  const gaps = [], decoySpots = [];
+  let lastWord = null, lastWasWord = false;
+  const mkGap = (kind, answer, options, wordEl) => {
+    const el = document.createElement("span"); el.className = "dg " + kind;
+    const g = {kind, answer, options, el, wordEl, miss:0, done:false};
+    el.addEventListener("click", () => { if (dk && !g.done){ dk.i = gaps.indexOf(g); dkFocus(); } });
+    gaps.push(g); return g;
+  };
+  const tokens = text.match(/(?:\p{L}|\[[^\]\n]*\])+|\s+|[^\p{L}\s\[]+|\[/gu) || [];
+  tokens.forEach((tok, ti) => {
+    if (/^(?:\p{L}|\[)/u.test(tok) && tok !== "["){
+      const wEl = document.createElement("span"); wEl.className = "dw";
+      const upFirst = tok.replace(/^\[/, "").charAt(0) !== tok.replace(/^\[/, "").charAt(0).toLowerCase();
+      const parts = manual ? manualGaps(tok) : autoGaps(tok);
+      parts.forEach((p, pi) => {
+        if (typeof p === "string" || !orto){
+          wEl.appendChild(document.createTextNode(typeof p === "string" ? p : p.gap)); return;
+        }
+        const up = pi === 0 && upFirst;
+        let opts = p.opts ? shuffle(p.opts.slice()) : DK_PAIRS[p.gap.toLowerCase()].slice();
+        opts = opts.map(o => capFirst(o, up));
+        const g = mkGap("o", p.gap, opts, wEl);
+        wEl.appendChild(g.el);
+      });
+      root.appendChild(wEl); lastWord = wEl; lastWasWord = true; return;
+    }
+    if (/^\s+$/.test(tok)){
+      if (lastWasWord && punkt && /^[ ]+$/.test(tok) && /^\p{L}/u.test(tokens[ti+1] || "")) decoySpots.push({after:lastWord, at:gaps.length});
+      root.appendChild(document.createTextNode(tok)); lastWasWord = false; return;
+    }
+    if (punkt && DK_GAPPABLE.test(tok)){
+      const ans = tok, opts = DK_MARKS.includes(ans) ? DK_MARKS.slice() : [...DK_MARKS, ans];
+      const g = mkGap("p", ans, [...opts, ""], lastWasWord ? lastWord : null);
+      root.appendChild(g.el); lastWasWord = false; return;
+    }
+    root.appendChild(document.createTextNode(tok)); lastWasWord = false;
+  });
+  /* pułapki: kilka miejsc bez żadnego znaku, żeby same okienka nie zdradzały odpowiedzi */
+  if (punkt){
+    const real = gaps.filter(g => g.kind === "p").length;
+    const picks = shuffle(decoySpots).slice(0, Math.round(real * 0.7)).sort((a, b) => b.at - a.at);
+    for (const sp of picks){
+      const g = {kind:"p", answer:"", options:[...DK_MARKS, ""], el:document.createElement("span"), wordEl:sp.after, miss:0, done:false};
+      g.el.className = "dg p";
+      g.el.addEventListener("click", () => { if (dk && !g.done){ dk.i = gaps.indexOf(g); dkFocus(); } });
+      sp.after.after(g.el);
+      gaps.splice(sp.at, 0, g);
+    }
+  }
+  return gaps;
+}
+
+function startDykt(){
+  const d = dkAll().find(x => x.id === dkSel) || DYKT_PRESETS[0];
+  dkSel = d.id;
+  dk = {d, gaps:[], i:0, errors:0, done:false, busy:false, streak:0};
+  dk.gaps = buildDykt(d);
+  renderDyktbar();
+  dkHud();
+  if (!dk.gaps.length){ $("blocks").innerHTML = ""; return; }
+  dkFocus();
+}
+function dkHud(){
+  $("dkDone").textContent = dk ? dk.gaps.filter(g => g.done).length : 0;
+  $("dkAll").textContent = dk ? dk.gaps.length : 0;
+  $("dkErr").textContent = dk ? dk.errors : 0;
+}
+function dkFocus(){
+  const g = dk.gaps[dk.i];
+  $("dykt").querySelectorAll(".cur").forEach(e => e.classList.remove("cur"));
+  if (!g) return;
+  g.el.classList.add("cur"); g.wordEl?.classList.add("cur");
+  /* przewiń tekst tak, żeby zaznaczenie było mniej więcej na środku */
+  const box = $("dykt"), r = g.el.getBoundingClientRect(), br = box.getBoundingClientRect();
+  const target = box.scrollTop + (r.top - br.top) - box.clientHeight/2 + r.height/2;
+  box.scrollTo({top:Math.max(0, target), behavior: reduced ? "auto" : "smooth"});
+  const blocks = $("blocks"), colors = shuffle(BLOCK_COLORS.slice());
+  blocks.className = "blocks dykt"; blocks.innerHTML = "";
+  blocks.setAttribute("aria-label", g.kind === "p" ? "Znak interpunkcyjny" : "Pisownia");
+  g.options.forEach((o, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "block" + (o === "" ? " word" : ""); b.textContent = o === "" ? "bez znaku" : o;
+    b.setAttribute("aria-label", o === "" ? "bez znaku" : o);
+    b.style.setProperty("--c", `var(${colors[i % colors.length]})`);
+    b.addEventListener("click", () => dkAnswer(b, o));
+    blocks.appendChild(b);
+  });
+}
+async function dkAnswer(btn, val){
+  if (!dk || dk.busy || dk.done) return;
+  const g = dk.gaps[dk.i]; if (!g) return;
+  if (val === g.answer){
+    dk.busy = true;
+    btn.classList.add("right");
+    g.done = true;
+    if (g.miss) dk.errors++;
+    g.el.classList.remove("cur");
+    if (g.answer === "") g.el.classList.add("none");
+    else { g.el.textContent = g.answer; g.el.classList.add(g.miss ? "fix" : "ok"); }
+    if (g.miss) dk.streak = 0; else dk.streak++;
+    if (ctx){ const t = ctx.currentTime; tone(mtof(84), t, 0.12, {type:"triangle", vol:0.2}); tone(mtof(91), t+0.07, 0.18, {type:"triangle", vol:0.18}); }
+    if (dk.streak && dk.streak % 10 === 0){ const r = g.el.getBoundingClientRect(); starBurst(r.left + r.width/2, r.top + r.height/2); run(); }
+    dkHud();
+    await wait(260);
+    dk.busy = false;
+    const next = dk.gaps.findIndex((x, k) => k > dk.i && !x.done);
+    dk.i = next >= 0 ? next : dk.gaps.findIndex(x => !x.done);
+    if (dk.i < 0) dkFinish(); else dkFocus();
+  } else {
+    g.miss++;
+    btn.classList.add("wrong");
+    g.el.classList.remove("bad"); void g.el.offsetWidth; g.el.classList.add("bad");
+    if (ctx){ const t = ctx.currentTime; tone(150, t, 0.25, {type:"square", vol:0.06}); }
+    if (g.miss >= 2) [...$("blocks").children].find(b => b.textContent === (g.answer === "" ? "bez znaku" : g.answer))?.classList.add("hint");
+  }
+}
+function dkFinish(){
+  dk.done = true;
+  $("dykt").querySelectorAll(".cur").forEach(e => e.classList.remove("cur"));
+  $("dykt").classList.add("done");
+  $("blocks").innerHTML = "";
+  const n = dk.gaps.length, e = dk.errors, pct = e / n;
+  const [faces, grade] = e === 0 ? ["⭐🏆⭐", "Bezbłędnie – celująco!"] : pct <= 0.05 ? ["⭐⭐⭐", "Bardzo dobrze!"] : pct <= 0.12 ? ["⭐⭐", "Dobrze!"] : pct <= 0.25 ? ["⭐", "Nieźle, poćwicz jeszcze."] : ["💪", "Spróbuj jeszcze raz!"];
+  const words = [...new Set(dk.gaps.filter(g => g.miss && g.kind === "o").map(g => g.wordEl.textContent))];
+  const punctErr = dk.gaps.filter(g => g.miss && g.kind === "p").length;
+  $("endFaces").textContent = faces;
+  $("endTitle").textContent = grade;
+  let html = `Dyktando <b>„${esc(dk.d.title)}”</b>: ${n - e} z ${n} miejsc dobrze za pierwszym razem.`;
+  if (words.length) html += `<br><span class="mistakes">Popraw: <b>${words.map(esc).join(", ")}</b></span>`;
+  if (punctErr) html += `<br><span class="mistakes">Błędy w interpunkcji: <b>${punctErr}</b></span>`;
+  $("endText").innerHTML = html;
+  $("endScreen").hidden = false;
+  if (pct <= 0.12){ fireworksShow(); balloons(); } else starBurst(W/2, H/3);
+  run();
+  if (ctx){ const t = ctx.currentTime; [60,64,67,72,76,79,84].forEach((m,i) => tone(mtof(m), t+i*0.1, 0.8, {type:"triangle", vol:0.2})); }
+}
+
+function renderDyktbar(){
+  const sel = $("dkSelect");
+  sel.innerHTML = "";
+  const og1 = document.createElement("optgroup"); og1.label = "Zestaw dyktand";
+  DYKT_PRESETS.forEach(d => og1.appendChild(new Option(d.title, d.id)));
+  sel.appendChild(og1);
+  if (dkCustom.length){
+    const og2 = document.createElement("optgroup"); og2.label = "Moje dyktanda";
+    dkCustom.forEach(d => og2.appendChild(new Option(d.title, d.id)));
+    sel.appendChild(og2);
+  }
+  sel.value = dkSel;
+  $("dkDelBtn").hidden = !dkCustom.some(d => d.id === dkSel);
+  $("dyktbar").querySelectorAll("[data-dk]").forEach(b => b.setAttribute("aria-pressed", String(dkKinds.includes(b.dataset.dk))));
+}
+function setupDyktbar(){
+  $("dkSelect").addEventListener("change", e => { dkSel = e.target.value; store.set("dyktSel", dkSel); soundTap(); startDykt(); });
+  $("dyktbar").addEventListener("click", e => {
+    const b = e.target.closest("[data-dk]"); if (!b) return;
+    const k = b.dataset.dk;
+    dkKinds = dkKinds.includes(k) ? dkKinds.filter(x => x !== k) : [...dkKinds, k];
+    if (!dkKinds.length) dkKinds = [k === "orto" ? "punkt" : "orto"];
+    store.set("dyktKinds", dkKinds); soundTap(); startDykt();
+  });
+  $("dkRestart").addEventListener("click", () => { soundTap(); startDykt(); });
+  $("dkAddBtn").addEventListener("click", () => {
+    $("dkTitle").value = ""; $("dkText").value = "";
+    $("dkAddScreen").hidden = false; $("dkTitle").focus();
+  });
+  $("dkCancel").addEventListener("click", () => { $("dkAddScreen").hidden = true; });
+  $("dkForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const title = $("dkTitle").value.trim(), text = $("dkText").value.trim();
+    if (!title || !text) return;
+    const d = {id:"u" + Date.now().toString(36), title, text};
+    dkCustom.push(d); store.set("dyktCustom", dkCustom);
+    dkSel = d.id; store.set("dyktSel", dkSel);
+    $("dkAddScreen").hidden = true;
+    soundGood(); startDykt();
+  });
+  $("dkDelBtn").addEventListener("click", () => {
+    const d = dkCustom.find(x => x.id === dkSel); if (!d) return;
+    if (!confirm(`Usunąć dyktando „${d.title}”?`)) return;
+    dkCustom = dkCustom.filter(x => x.id !== d.id); store.set("dyktCustom", dkCustom);
+    dkSel = DYKT_PRESETS[0].id; store.set("dyktSel", dkSel);
+    startDykt();
+  });
+  renderDyktbar();
+}
+/* klawiatura: znaki wpisuje się wprost, spacja/Enter = bez znaku, cyfry 1–9 wybierają klocek */
+document.addEventListener("keydown", e => {
+  if (mode !== "dykt" || !dk || dk.done || !$("startScreen").hidden || !$("endScreen").hidden || !$("dkAddScreen").hidden) return;
+  if (e.target.closest && e.target.closest("input,textarea,select")) return;
+  const g = dk.gaps[dk.i]; if (!g) return;
+  const btns = [...$("blocks").children];
+  let val = null;
+  if (/^[1-9]$/.test(e.key) && btns[+e.key - 1]) val = g.options[+e.key - 1];
+  else if (g.kind === "p"){
+    if (e.key === " " || e.key === "Enter") val = "";
+    else if (e.key === "-") val = "–";
+    else if (g.options.includes(e.key)) val = e.key;
+  }
+  if (val === null) return;
+  e.preventDefault();
+  const b = btns[g.options.indexOf(val)];
+  if (b && !b.classList.contains("wrong")) dkAnswer(b, val);
+});
+
 let masterName = "literek";
 function finish(){
   $("endFaces").textContent = "⭐🏆⭐";
@@ -2031,11 +2369,15 @@ function chooseLevel(m){
   mode = m;
   document.body.classList.toggle("lapmode", m === "lap");
   document.body.classList.toggle("pilkmode", m === "pilk");
+  document.body.classList.toggle("dyktmode", m === "dykt");
+  $("dyktbar").hidden = m !== "dykt";
+  if (m !== "dykt") $("blocks").classList.remove("dykt");
   $("lapbar").hidden = m !== "lap";
   $("pilkbar").hidden = m !== "pilk";
   updateBackgroundSound();
   if (m === "pilk"){ $("mathbar").hidden = true; return; }
   if (m === "lap"){ $("mathbar").hidden = true; return; }
+  if (m === "dykt"){ $("mathbar").hidden = true; if (changed || !dk || dk.done) startDykt(); return; }
   masterName = m === "orto" ? "ortografii" : m === "mat" ? "matematyki" : "literek";
   $("blocks").setAttribute("aria-label", m === "orto" ? "Brakujące litery" : m === "mat" ? "Wynik" : "Literki");
   if (changed || stars >= ROUNDS){ stars = 0; renderStars(); renderRound(); }
@@ -2053,6 +2395,8 @@ $("settingsBtn").addEventListener("click", () => { settingsVisible = !settingsVi
 $("pilkBtn").addEventListener("click", () => { chooseLevel("pilk"); $("playBtn").dispatchEvent(new Event("start")); });
 setupPitch();
 $("lapBtn").addEventListener("click", () => { chooseLevel("lap"); $("playBtn").dispatchEvent(new Event("start")); });
+$("dyktBtn").addEventListener("click", () => { chooseLevel("dykt"); $("playBtn").dispatchEvent(new Event("start")); });
+setupDyktbar();
 $("mathBtn").addEventListener("click", () => { chooseLevel("mat"); $("playBtn").dispatchEvent(new Event("start")); });
 setupMathbar();
 $("orthoBtn").addEventListener("click", () => { chooseLevel("orto"); $("playBtn").dispatchEvent(new Event("start")); });
@@ -2064,6 +2408,7 @@ $("playBtn").addEventListener("start", () => {
   updateBackgroundSound();
   if (mode === "lap"){ startLap(); return; }
   if (mode === "pilk"){ startPilk(); return; }
+  if (mode === "dykt") return;
   setTimeout(() => { locked = false; }, 500);
   schedulePeek();
 });
@@ -2071,6 +2416,7 @@ $("againBtn").addEventListener("click", () => {
   $("endScreen").hidden = true;
   if (mode === "lap"){ startLap(); return; }
   if (mode === "pilk"){ startPilk(); return; }
+  if (mode === "dykt"){ startDykt(); return; }
   stars = 0; renderStars();
   startRound();
 });
