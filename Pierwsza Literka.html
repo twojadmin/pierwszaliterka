@@ -168,11 +168,12 @@ body.lapmode .lapHud{display:flex}
 #fx{position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:10}
 
 .overlay{
-  position:fixed; inset:0; z-index:5; display:grid; place-items:center; padding-inline:16px;
+  position:fixed; inset:0; z-index:5; display:flex; padding:16px; box-sizing:border-box;
+  overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
   background:rgba(190,227,248,.72); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
 }
 .panel{
-  background:var(--card); border-radius:40px; text-align:center; max-width:460px; width:100%; box-sizing:border-box;
+  background:var(--card); border-radius:40px; text-align:center; max-width:460px; width:100%; box-sizing:border-box; margin:auto; flex-shrink:0;
   padding:28px 24px 32px; display:flex; flex-direction:column; align-items:center; gap:10px;
   box-shadow:0 12px 0 rgba(36,50,74,.08), 0 30px 60px rgba(36,50,74,.18);
 }
@@ -234,6 +235,15 @@ body.dyktmode .dyktHud{display:flex}
 .panel .play.grey{background:#B9C3D3; box-shadow:inset 0 0 0 5px rgba(255,255,255,.3), 0 8px 0 #8C97A8}
 .panel code{background:#EEF4FB; border-radius:6px; padding:0 5px}
 .mistakes{font-size:18px !important; color:var(--ink) !important}
+@media (max-height:760px), (max-width:600px){
+  .panel{padding:18px 18px 22px; gap:6px}
+  .panel .faces{font-size:36px}
+  .levels{gap:8px}
+  .level{padding:8px 14px}
+  .level b{font-size:24px}
+  .level span{font-size:14px}
+}
+@media (max-width:600px){ .levels{grid-template-columns:repeat(2,minmax(0,1fr))} .level{border-radius:20px; padding:8px 12px} .level b{font-size:22px} .level span{font-size:13px; line-height:1.25} .panel h1{font-size:38px} .panel p{font-size:17px} }
 @media (max-width:600px){ .blocks.dykt{grid-template-columns:repeat(auto-fit, minmax(48px, 76px)); gap:8px} .blocks.dykt .block{font-size:28px; border-radius:16px} .blocks.dykt .block.word{font-size:14px} }
 
 @media (max-height:700px){ .pic{font-size:clamp(64px,18vh,130px)} }
