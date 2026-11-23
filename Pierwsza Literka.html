@@ -99,7 +99,10 @@ body.pajmode #pawBadge{display:none}
   body.pajmode .top{flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto}
   body.pajmode .top > *{flex-shrink:0}
   body.pajmode #pajbar{flex-basis:auto; flex-wrap:nowrap; order:3}
-  body.pajmode #pajbar .seg button{padding:4px 10px; font-size:15px}
+  body.pajmode #pajbar .dsel{padding:4px 8px; font-size:15px; width:150px}
+  body.pajmode #pjName{display:none}
+  body.pajmode .top .pill{padding:4px 9px}
+  body.pajmode #pajbar{gap:6px}
   body.pajmode .pajHud{order:1} body.pajmode .right{order:2}
 }
 @media (pointer:coarse){ body.pajmode .pjhint{display:none} }
@@ -360,11 +363,7 @@ body.dyktmode .dyktHud{display:flex}
       <button class="pill" id="dkRestart" type="button">↻ Od nowa</button>
     </div>
     <div class="mathbar" id="pajbar" hidden>
-      <div class="seg" role="group" aria-label="Świat">
-        <button type="button" data-pjl="0">Łąka</button>
-        <button type="button" data-pjl="1">Tunele</button>
-        <button type="button" data-pjl="2">Pajęczyna</button>
-      </div>
+      <select class="dsel" id="pjSelect" aria-label="Wybierz świat"></select>
       <button class="pill" id="pjRestart" type="button">↻ Od nowa</button>
       <span class="pjhint">← → chodzenie · spacja skok · skok w powietrzu = sufit · ↓ puść sufit</span>
     </div>
@@ -2567,6 +2566,29 @@ const PJ_CHUNKS = {
   W4:`....................|..------------......|...d....d...........|....................|....................|....................|.............o.j....|..........------....|....................|.C...----...........|#####.........######|#####.........######`,
   W5:`........................|........................|..----------------------|...o..$..o..j..o........|........................|........w.......w.......|........................|........................|........................|........................|###...................##|###...................##`,
   W6:`............|............|............|............|............|............|......$.....|............|............|.......F....|############|############`,
+  G0:`..............|..............|..............|..............|..............|..............|..............|.......o.o....|..............|..S...........|##############|##############`,
+  G1:`..................|..................|..................|..................|.......$..........|......###.........|..........o.o.....|.........#####....|..................|...b..............|##################|##################`,
+  G2:`....................|....................|....................|....o.o.o...........|....................|....................|....................|....................|....................|..b.................|####^^^^^###########|####################`,
+  G3:`......................|......................|......................|..LLLLLLLLLLLLLLLLLL..|..LLLLLLLLLLLLLLLLLL..|...o.o.o.$.o.o.o.o....|......................|.........w............|......................|.C....................|####^^^^^^^^^^^^^^####|######################`,
+  G4:`................|................|....######......|................|....o..$..o.....|................|................|................|................|..b......a......|################|################`,
+  G5:`..................|..................|..................|........o.o.......|..................|..................|..................|.........b........|....###.###...###.|..................|###............###|###^^^^^^^^^^^^###`,
+  G6:`..................|..................|...LLLLLLLLLLLL...|...LLLLLLLLLLLL...|....o.......o.....|........##........|........##........|........##........|.C......##........|........##..j.....|##################|##################`,
+  G7:`..............|..............|..............|..............|..............|..............|......$.......|..............|..............|..........F...|##############|##############`,
+  K0:`##############|##############|##############|..............|..............|..............|..............|.......o.o....|..............|..S...........|##############|##############`,
+  K1:`##################|##################|##################|...o.o.o.o.o......|..................|..................|..................|.......$..........|......###.........|..a.......a....a..|##################|##################`,
+  K2:`##################|##################|##################|...$...$...$......|..................|..##############..|....o.o.o.o.o.....|..................|..................|.C................|###^^^^^^^^^^^^###|##################`,
+  K3:`################|################|################|...d...d...d....|................|................|.......$........|................|................|..o..b....a..j..|################|################`,
+  K4:`##################|##################|##################|###...............|###..........o....|......o...........|........##########|........##########|....##.....j......|....##........a...|##################|##################`,
+  K5:`####################|####################|####################|...o...d.$...d.o....|....................|....................|....................|....................|....................|.C..................|###^^^^^^^^^^^^^^###|####################`,
+  K6:`################|################|################|................|................|................|..o.o...........|................|................|...a.....b..a...|################|################`,
+  K7:`##############|##############|##############|..............|..............|..............|......$.......|..............|..............|..........F...|##############|##############`,
+  N0:`............|............|............|............|............|............|............|......o.....|............|..S.........|############|############`,
+  N1:`..................|..................|..................|.............o....|............------|..................|........---.......|.......j..........|....---...........|..................|.---..............|..................`,
+  N2:`........................|------------------------|...o..$..o..o..$..o.....|C.......................|--......................|........w.......w.......|........................|........................|........................|........................|........................|....................####`,
+  N3:`..................|..................|...------------...|....d.....d.......|..................|.....w...$..w.....|..................|..................|..................|.Co.......j.......|#######...########|#######...########`,
+  N4:`......................|......................|......................|......................|......................|......o.......o.......|.....---.....---......|.........o............|..---..---..---..---..|C.....................|##....................|##....................`,
+  N5:`........................|........................|..----------------------|...o..d..$..d..o..d.....|........................|........................|........w.......w.......|........................|---.....................|........................|......................##|......................##`,
+  N6:`............|............|............|............|............|............|......$.....|............|............|.......F....|############|############`,
 };
 const PJ_LEVELS = [
   {name:"Łąka", zone:"laka", chunks:["M0","M1","M2","M3","M4","M5","M6","M7","M8"],
@@ -2575,6 +2597,12 @@ const PJ_LEVELS = [
    tip:"W tunelu sufit jest wszędzie – przejdź po nim nad kolcami. Uważaj na krople!"},
   {name:"Pajęczyna", zone:"siec", chunks:["W0","W1","W2","W3","W4","W5","W6"],
    tip:"Skacz po nitkach pajęczyny i chodź pod nimi. Pod spodem przepaść!"},
+  {name:"Ogród", zone:"laka", chunks:["G0","G1","G2","G3","G4","G5","G6","G7"],
+   tip:"Czerwone grzybki to trampoliny – wskocz na nie, a wyskoczysz bardzo wysoko!"},
+  {name:"Mrowisko", zone:"tunel", chunks:["K0","K1","K2","K3","K4","K5","K6","K7"],
+   tip:"Na mrówki możesz skoczyć z góry. Zajrzyj też do górnych korytarzy!"},
+  {name:"Nocna pajęczyna", zone:"siec", chunks:["N0","N1","N2","N3","N4","N5","N6"],
+   tip:"Najdłuższa wyprawa – uważaj na krople i osy pod nitkami."},
 ];
 let pj = null, pjRaf = null, pjLast = 0, pjLvl = store.get("pajLvl", 0);
 const pjKeys = {L:false, R:false, J:false, D:false, Z:false}, pjPress = {J:false, D:false, Z:false};
@@ -2605,7 +2633,7 @@ function pjTile(c, r){
   if (r >= PJ_ROWS) return ".";
   return pj.grid[r][c];
 }
-function pjSolid(c, r){ const t = pjTile(c, r); return t === "#" || t === "L"; }
+function pjSolid(c, r){ const t = pjTile(c, r); return t === "#" || t === "L" || t === "b"; }
 function pjWeb(c, r){ return pjTile(c, r) === "-"; }
 function pjCeil(c, r){ return pjSolid(c, r) || pjWeb(c, r); }
 
@@ -2614,7 +2642,7 @@ function startPaj(lvl = pjLvl, sum = null){
   const L = PJ_LEVELS[pjLvl], m = pjParse(pjLvl);
   pj = {...m, lvl:pjLvl, zone:L.zone, name:L.name, t:0, state:"play", cam:0, T:40, vw:12,
         got:{o:0, j:0, $:0}, all:{o:0, j:0, $:0}, ouch:0, falls:0, sum:sum || {o:0, j:0, $:0, ouch:0, falls:0},
-        cp:m.start, drops:[], fx:[], pops:[], miss:null, tipUntil:7, introUntil:1.8, deadT:0, winT:0,
+        cp:m.start, drops:[], fx:[], pops:[], bounce:{}, miss:null, tipUntil:7, introUntil:1.8, deadT:0, winT:0,
         sp:{x:0, y:0, w:0.62, h:0.62, vx:0, vy:0, face:1, onGround:false, onCeil:false, zip:null, coyote:0, invT:0, knock:0, squash:0, walk:0}};
   pj.items.forEach(it => pj.all[it.k]++);
   pj.sp.w = pj.sp.h = pjSize();
@@ -2651,15 +2679,17 @@ function pjHud(){
   $("pjC").textContent = `${pj.got.$}/${pj.all.$}`;
 }
 function renderPajbar(){
-  $("pajbar").querySelectorAll("[data-pjl]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.pjl === pjLvl)));
+  const sel = $("pjSelect");
+  if (sel.options.length !== PJ_LEVELS.length) sel.innerHTML = PJ_LEVELS.map((L, i) => `<option value="${i}">${i + 1}. ${L.name}</option>`).join("");
+  sel.value = String(pjLvl);
 }
 function setupPajbar(){
   $("pajbar").addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
     b.blur(); soundTap();
-    if (b.dataset.pjl !== undefined) startPaj(+b.dataset.pjl);
     if (b.id === "pjRestart") startPaj(pjLvl);
   });
+  $("pjSelect").addEventListener("change", e => { soundTap(); startPaj(+e.target.value); e.target.blur(); });
   const pad = $("pjPad");
   const set = (b, on) => {
     const k = b.dataset.k; b.classList.toggle("on", on);
@@ -2725,6 +2755,11 @@ function pjMoveY(s, dy){
   const c0 = Math.floor(s.x + 0.001), c1 = Math.floor(s.x + s.w - 0.001);
   if (dy > 0){
     const r = Math.floor(s.y + s.h);
+    for (let c=c0; c<=c1; c++) if (s === pj.sp && pjTile(c, r) === "b" && prevBottom <= r + 0.02){
+      // trampolina: wyrzuca wysoko
+      s.y = r - s.h; s.vy = -20; s.boost = true; s.onGround = false; s.squash = -1;
+      pj.bounce[c + "," + r] = pj.t; pjSweep(220, 880, 0.3, "triangle", 0.16); return true;
+    }
     for (let c=c0; c<=c1; c++) if (pjSolid(c, r) || (pjWeb(c, r) && prevBottom <= r + 0.02)){ s.y = r - s.h; s.vy = 0; s.onGround = true; return true; }
   } else if (dy < 0){
     const r = Math.floor(s.y);
@@ -2755,8 +2790,9 @@ function pjDie(){
 function pjHurt(fromX){
   const s = pj.sp;
   if (s.invT > 0 || pj.state !== "play") return;
-  s.invT = 1.5; s.knock = 0.35; s.onCeil = false; s.zip = null;
-  s.vy = -7; s.vx = (s.x + s.w/2 < fromX ? -1 : 1)*6;
+  s.invT = 1.5;
+  if (s.onCeil){ s.vx = 0; }
+  else { s.knock = 0.35; s.zip = null; s.vy = -7; s.vx = (s.x + s.w/2 < fromX ? -1 : 1)*6; }
   pj.ouch++; pjSfx("hurt");
   pjBurst(s.x + s.w/2, s.y + s.h/2, "#FFFFFF", 8);
   pj.pops.push({x:s.x + s.w/2, y:s.y - 0.2, text:"Au!", t:pj.t, c:"#EF6A4C"});
@@ -2805,7 +2841,8 @@ function pjUpdate(dt){
       else pjZip();
     } else if (P.Z) pjZip();
     if (!s.zip){
-      if (!I.J && s.vy < -6 && s.knock <= 0) s.vy = -6;
+      if (s.vy >= 0) s.boost = false;
+      if (!I.J && s.vy < -6 && s.knock <= 0 && !s.boost) s.vy = -6;
       s.vy = Math.min(18, s.vy + PJ_GRAV*dt);
       pjMoveX(s, s.vx*dt);
       const wasAir = !s.onGround;
@@ -2838,7 +2875,7 @@ function pjUpdate(dt){
     const sr = s.w/2 - 0.04;
     if (Math.abs(ex - sx) > hw + sr || Math.abs(ey - sy) > hh + sr) continue;
     if (e.k === "a" && !s.onCeil && s.vy > 0 && s.y + s.h - (e.y - 0.5) < 0.38){
-      e.dead = pj.t; s.vy = -9.5; pjSfx("stomp"); pjBurst(ex, ey, "#3A2222", 8);
+      e.dead = pj.t; s.vy = -9.5; s.boost = true; pjSfx("stomp"); pjBurst(ex, ey, "#3A2222", 8);
       pj.pops.push({x:ex, y:ey - 0.5, text:"Hop!", t:pj.t, c:"#FFFFFF"});
     } else pjHurt(ex);
   }
@@ -3037,6 +3074,13 @@ function pjTileDraw(c, k, col, r, T){
     c.fillStyle = "#3F9A50";
     if (pjTile(col, r - 1) !== "L") for (let i=0; i<3; i++){ c.beginPath(); c.arc(x + T*(0.17 + i*0.33), y + T*0.05, T*0.2, 0, Math.PI*2); c.fill(); }
     if (pjTile(col, r + 1) !== "L") for (let i=0; i<3; i++){ c.beginPath(); c.arc(x + T*(0.17 + i*0.33), y + T*0.95, T*0.2, 0, Math.PI*2); c.fill(); }
+  } else if (k === "b"){
+    const a = pj.t - (pj.bounce[col + "," + r] ?? -9), sq = a < 0.25 ? Math.sin(a/0.25*Math.PI)*0.25 : 0;
+    c.fillStyle = "#F4E9D8"; c.fillRect(x + T*0.36, y + T*(0.5 + sq*0.4), T*0.28, T*(0.5 - sq*0.4) + 0.6);
+    const cy = y + T*(0.55 + sq*0.5);
+    c.fillStyle = "#E23B3B"; c.beginPath(); c.ellipse(x + T/2, cy, T*0.5*(1 + sq*0.6), T*0.45*(1 - sq), 0, Math.PI, 0); c.fill();
+    c.fillStyle = "#FFFFFF";
+    [[0.28, 0.32, 0.08], [0.55, 0.2, 0.09], [0.75, 0.38, 0.07]].forEach(([dx, dy, rr]) => { c.beginPath(); c.arc(x + T*dx, cy - T*0.45*(1 - sq) + T*dy*(1 - sq), T*rr, 0, Math.PI*2); c.fill(); });
   } else if (k === "t"){
     c.fillStyle = "#8B5A35"; c.fillRect(x + T*0.28, y, T*0.44, T + 0.6);
     c.fillStyle = "#74492A"; c.fillRect(x + T*0.42, y, T*0.06, T + 0.6);
