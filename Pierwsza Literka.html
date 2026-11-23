@@ -76,6 +76,24 @@ body.pilkmode .card, body.pilkmode .blocks, body.pilkmode .stars{display:none}
 body.pilkmode .pitch{display:block}
 body.pilkmode .pilkHud{display:flex}
 body.pilkmode .stage{place-items:stretch}
+.level.paj{background:#4B3B74; box-shadow:inset 0 0 0 5px rgba(255,255,255,.3), 0 7px 0 #2E2349}
+.pjc{display:none; width:100%; height:100%; border-radius:24px; touch-action:none; box-shadow:0 10px 0 rgba(36,50,74,.12)}
+.pajHud{display:none; gap:6px; flex-wrap:wrap; font-variant-numeric:tabular-nums}
+.pajHud .pill{cursor:default}
+body.pajmode .card, body.pajmode .blocks, body.pajmode .stars{display:none}
+body.pajmode .pjc{display:block}
+body.pajmode .pajHud{display:flex}
+body.pajmode .stage{place-items:stretch; position:relative; min-width:0}
+body.pajmode .app{grid-template-columns:minmax(0,1fr); grid-template-rows:auto 1fr 0px}
+.pjpad{display:none; position:absolute; left:10px; right:10px; bottom:10px; justify-content:space-between; pointer-events:none}
+body.pajmode .pjpad{display:flex}
+.pjpad div{display:flex; gap:10px; pointer-events:auto}
+.pjpad button{width:clamp(54px,13vw,72px); height:clamp(54px,13vw,72px); border-radius:50%; border:0; padding:0; background:rgba(255,255,255,.6); color:#24324A;
+  font-size:clamp(22px,6vw,32px); line-height:1; box-shadow:0 4px 0 rgba(36,50,74,.25); touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; cursor:pointer}
+.pjpad button.on{background:rgba(255,255,255,.95); transform:translateY(3px); box-shadow:0 1px 0 rgba(36,50,74,.25)}
+@media (hover:hover) and (pointer:fine){ .pjpad button{opacity:.6} }
+.pjhint{font-size:15px; color:var(--muted); text-align:center}
+@media (max-width:600px){ .pjhint{display:none} }
 .level.lap{background:var(--plum); box-shadow:inset 0 0 0 5px rgba(255,255,255,.3), 0 7px 0 #6E3F8F}
 .seglabel{align-self:center; padding:0 6px 0 10px; font-size:15px; font-weight:700; color:var(--muted)}
 .lapHud{display:none; gap:6px; flex-wrap:wrap; font-variant-numeric:tabular-nums}
@@ -301,6 +319,12 @@ body.dyktmode .dyktHud{display:flex}
       <span class="pill" title="Uzupełnione miejsca">✏️ <span id="dkDone">0</span>/<span id="dkAll">0</span></span>
       <span class="pill" title="Błędy">❌ <span id="dkErr">0</span></span>
     </div>
+    <div class="pajHud">
+      <span class="pill" id="pjName" title="Poziom">Łąka</span>
+      <span class="pill" title="Poziomki">🍓 <span id="pjO">0</span></span>
+      <span class="pill" title="Jagody">🫐 <span id="pjJ">0</span></span>
+      <span class="pill" title="Monety">🪙 <span id="pjC">0</span></span>
+    </div>
     <div class="pilkHud">
       <span class="pill" title="Gole">⚽ <span id="pkGoals">0</span>/10</span>
       <span class="pill" title="Strzały">🥅 <span id="pkShots">0</span></span>
@@ -316,6 +340,15 @@ body.dyktmode .dyktHud{display:flex}
       <button class="pill" id="dkAddBtn" type="button">＋ Własne</button>
       <button class="pill" id="dkDelBtn" type="button" title="Usuń to dyktando" hidden>🗑</button>
       <button class="pill" id="dkRestart" type="button">↻ Od nowa</button>
+    </div>
+    <div class="mathbar" id="pajbar" hidden>
+      <div class="seg" role="group" aria-label="Świat">
+        <button type="button" data-pjl="0">Łąka</button>
+        <button type="button" data-pjl="1">Tunele</button>
+        <button type="button" data-pjl="2">Pajęczyna</button>
+      </div>
+      <button class="pill" id="pjRestart" type="button">↻ Od nowa</button>
+      <span class="pjhint">← → chodzenie · spacja skok · skok w powietrzu = sufit · ↓ puść sufit</span>
     </div>
     <div class="mathbar" id="pilkbar" hidden>
       <div class="seg" role="group" aria-label="Bramkarz">
@@ -366,6 +399,11 @@ body.dyktmode .dyktHud{display:flex}
     <div class="dtext" id="dykt" aria-live="polite"></div>
     <div class="picnic" id="picnic" aria-hidden="true"></div>
     <canvas class="pitch" id="pitch" aria-label="Boisko: dotknij bramki, żeby wycelować, i puść, żeby strzelić"></canvas>
+    <canvas class="pjc" id="pajCanvas" aria-label="Pajączek: chodź, skacz i przyczepiaj się do sufitu, zbieraj poziomki, jagody i monety"></canvas>
+    <div class="pjpad" id="pjPad">
+      <div><button type="button" data-k="L" aria-label="W lewo">◀</button><button type="button" data-k="R" aria-label="W prawo">▶</button></div>
+      <div><button type="button" data-k="Z" aria-label="Sieć do sufitu">🕸</button><button type="button" data-k="J" aria-label="Skok">⤒</button></div>
+    </div>
     <div class="card" id="card">
       <button class="pic" id="pic" type="button" aria-label="Posłuchaj jeszcze raz">🐸</button>
       <div class="word" id="word"><span id="pre"></span><span class="first" id="first">Ż</span><span id="rest">aba</span></div>
@@ -387,6 +425,7 @@ body.dyktmode .dyktHud{display:flex}
       <button class="level mat" id="mathBtn" type="button"><b>Matematyka</b><span>dodawanie i odejmowanie, od 20 do 1000</span></button>
       <button class="level pilk" id="pilkBtn" type="button"><b>Piłkomat</b><span>rzuty karne – strzel 10 goli!</span></button>
       <button class="level lap" id="lapBtn" type="button"><b>Łapkomat</b><span>łapki kradną owoce – daj im po łapkach!</span></button>
+      <button class="level paj" id="pajBtn" type="button"><b>Pajączek</b><span>skacz, chodź po suficie i zbieraj poziomki!</span></button>
     </div>
     <p class="note">Włącz dźwięk, żeby słyszeć muzykę.</p>
   </div>
@@ -1012,7 +1051,7 @@ let peekTimer = null;
 function schedulePeek(){
   clearTimeout(peekTimer);
   peekTimer = setTimeout(() => {
-    if ($("startScreen").hidden && $("endScreen").hidden && mode !== "lap" && mode !== "pilk" && mode !== "dykt"){
+    if ($("startScreen").hidden && $("endScreen").hidden && mode !== "lap" && mode !== "pilk" && mode !== "dykt" && mode !== "paj"){
       const r = Math.random();
       if (r < 0.55) spawnPaw({edges:["left","right","top"], dur:rand(3000,4200), sound:false});
       else if (r < 0.72) spawnBalloon(rand(40, W-40), H + 40);
@@ -2479,12 +2518,701 @@ $("musicBtn").addEventListener("click", () => {
   updateBackgroundSound();
 });
 
+/* ---------- Pajączek: platformówka – skoki, chodzenie po suficie, poziomki, jagody i monety ----------
+   Mapy składają się z kawałków 12 wierszy:
+   # ziemia/gałąź   L liście   t pień (tło)   - nitka pajęczyny (można na niej stanąć i przyczepić się od spodu)
+   ^ kolce   o poziomka   j jagoda   $ moneta   a mrówka   w osa   d kapiąca kropla
+   S start   C punkt kontrolny   F meta */
+const PJ_ROWS = 12, PJ_RUN = 5.6, PJ_JUMP = 14.6, PJ_GRAV = 38, PJ_ZIP = 15, PJ_REACH = 8;
+const PJ_CHUNKS = {
+  M0:`..............|..............|..............|..............|..............|..............|..............|.......o.o....|..............|..S...........|##############|##############`,
+  M1:`................|................|................|................|................|.........o......|........###.....|....o...........|...###......j...|...........###..|################|################`,
+  M2:`..............|..............|..............|..............|..............|..............|......$.......|....o..o......|..............|..........a...|#####...######|#####^^^######`,
+  M3:`......................|......................|......................|......................|..LLLLLLLLLLLLLLLLLL..|..LLLLLLLLLLLLLLLLLL..|...o.o.o.o.o.o.o.o....|......................|......................|.C....................|####^^^^^^^^^^^^^^####|######################`,
+  M4:`................|................|................|.....LLLLL......|....LLLLLLL.....|....o..t.$......|.......t....j...|.......t..w.....|.......t........|.......t...o....|################|################`,
+  M5:`..................|..................|...LLLLLLLLLLLL...|...LLLLLLLLLLLL...|.....o......o.....|........##........|........##........|........##........|.....j..##..j.....|........##........|##################|##################`,
+  M6:`................|................|................|................|................|........$.......|.......###......|................|....###....###..|.C..............|###..........###|###^^^^^^^^^^###`,
+  M7:`................|................|................|................|................|................|................|..........o.o...|.........#####..|...a............|################|################`,
+  M8:`..............|..............|..............|..............|..............|..............|......$.......|..............|..............|..........F...|##############|##############`,
+  T0:`##############|##############|##############|..............|..............|..............|..............|.......o.o....|..............|..S...........|##############|##############`,
+  T1:`################|################|################|................|................|................|.....o..........|.........$......|....##..........|....##...##.j...|################|################`,
+  T2:`####################|####################|####################|...o.o.o.o.o.o.o....|....................|....................|....................|....................|....................|.C..................|###^^^^^^^^^^^^^^###|####################`,
+  T3:`################|################|################|....d.....d.....|................|................|..........$.....|................|.....o......j...|.......a........|################|################`,
+  T4:`################|################|################|######..........|######..........|######......o...|..o.............|..........##....|......##..##....|......##..##.j..|################|################`,
+  T5:`################|################|################|.......$..$.....|................|.....######.....|................|................|....o......o....|.C......a.......|################|################`,
+  T6:`##################|##################|##################|...d....d....d....|..................|..................|..................|.....o.....j......|....###...###.....|..................|###............###|###^^^^^^^^^^^^###`,
+  T7:`##############|##############|##############|..............|..............|..............|......$.......|..............|..............|..........F...|##############|##############`,
+  W0:`............|............|............|............|............|............|............|......o.....|............|..S.........|############|############`,
+  W1:`..................|..................|..................|..................|..................|.........o........|.......----.......|...j..............|.----........---..|..................|..................|..................`,
+  W2:`......................|......................|......................|..--------------------|....o.o.$.o.o.........|......................|.........w....w.......|.C....................|-----.............----|......................|......................|......................`,
+  W3:`................|................|................|....------......|.......$........|................|................|.......w....o...|................|..o.........j...|######...#######|######...#######`,
+  W4:`....................|..------------......|...d....d...........|....................|....................|....................|.............o.j....|..........------....|....................|.C...----...........|#####.........######|#####.........######`,
+  W5:`........................|........................|..----------------------|...o..$..o..j..o........|........................|........w.......w.......|........................|........................|........................|........................|###...................##|###...................##`,
+  W6:`............|............|............|............|............|............|......$.....|............|............|.......F....|############|############`,
+};
+const PJ_LEVELS = [
+  {name:"Łąka", zone:"laka", chunks:["M0","M1","M2","M3","M4","M5","M6","M7","M8"],
+   tip:"Skocz pod sufitem i naciśnij skok jeszcze raz – pajączek się przyczepi! 🕸"},
+  {name:"Tunele", zone:"tunel", chunks:["T0","T1","T2","T3","T4","T5","T6","T7"],
+   tip:"W tunelu sufit jest wszędzie – przejdź po nim nad kolcami. Uważaj na krople!"},
+  {name:"Pajęczyna", zone:"siec", chunks:["W0","W1","W2","W3","W4","W5","W6"],
+   tip:"Skacz po nitkach pajęczyny i chodź pod nimi. Pod spodem przepaść!"},
+];
+let pj = null, pjRaf = null, pjLast = 0, pjLvl = store.get("pajLvl", 0);
+const pjKeys = {L:false, R:false, J:false, D:false, Z:false}, pjPress = {J:false, D:false, Z:false};
+const pjHash = (a, b) => { let h = Math.imul(a*7 + 13, 374761393) ^ Math.imul(b*3 + 7, 668265263); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0)/4294967296; };
+function pjPl(n, one, few, many){ return n === 1 ? one : (n%10 >= 2 && n%10 <= 4 && (n%100 < 10 || n%100 >= 20)) ? few : many; }
+
+function pjParse(i){
+  const L = PJ_LEVELS[i], rows = Array.from({length:PJ_ROWS}, () => "");
+  L.chunks.forEach(k => PJ_CHUNKS[k].split("|").forEach((line, r) => { rows[r] += line; }));
+  const grid = rows.map(r => r.split(""));
+  const m = {grid, W:grid[0].length, items:[], enemies:[], drips:[], cps:[], start:{x:1, y:9}, fin:null};
+  grid.forEach((row, r) => row.forEach((ch, c) => {
+    if ("oj$".includes(ch)) m.items.push({k:ch, x:c + 0.5, y:r + 0.5, taken:false});
+    else if (ch === "a") m.enemies.push({k:"a", x:c + 0.5, x0:c + 0.5, y:r + 1, dir:-1, dead:0, walk:0});
+    else if (ch === "w") m.enemies.push({k:"w", x0:c + 0.5, y0:r + 0.5, x:c + 0.5, y:r + 0.5, ph:pjHash(c, r)*6, vx:1});
+    else if (ch === "d") m.drips.push({x:c + 0.5, y:r, next:0.5 + pjHash(c, r)*2});
+    else if (ch === "C") m.cps.push({x:c, y:r, on:false});
+    else if (ch === "S") m.start = {x:c, y:r};
+    else if (ch === "F") m.fin = {x:c, y:r};
+    else return;
+    row[c] = ".";
+  }));
+  return m;
+}
+function pjTile(c, r){
+  if (c < 0 || c >= pj.W) return "#";
+  if (r < 0) return pj.zone === "tunel" ? "#" : ".";
+  if (r >= PJ_ROWS) return ".";
+  return pj.grid[r][c];
+}
+function pjSolid(c, r){ const t = pjTile(c, r); return t === "#" || t === "L"; }
+function pjWeb(c, r){ return pjTile(c, r) === "-"; }
+function pjCeil(c, r){ return pjSolid(c, r) || pjWeb(c, r); }
+
+function startPaj(lvl = pjLvl, sum = null){
+  pjLvl = Math.max(0, Math.min(PJ_LEVELS.length - 1, lvl)); store.set("pajLvl", pjLvl);
+  const L = PJ_LEVELS[pjLvl], m = pjParse(pjLvl);
+  pj = {...m, lvl:pjLvl, zone:L.zone, name:L.name, t:0, state:"play", cam:0, T:40, vw:12,
+        got:{o:0, j:0, $:0}, all:{o:0, j:0, $:0}, ouch:0, falls:0, sum:sum || {o:0, j:0, $:0, ouch:0, falls:0},
+        cp:m.start, drops:[], fx:[], pops:[], miss:null, tipUntil:7, introUntil:1.8, deadT:0, winT:0,
+        sp:{x:0, y:0, w:0.74, h:0.74, vx:0, vy:0, face:1, onGround:false, onCeil:false, zip:null, coyote:0, invT:0, knock:0, squash:0, walk:0}};
+  pj.items.forEach(it => pj.all[it.k]++);
+  pjRespawn(true);
+  pjHud(); renderPajbar();
+  if (!pjRaf){ pjLast = performance.now(); pjRaf = requestAnimationFrame(pjFrame); }
+}
+function stopPaj(){ if (pjRaf) cancelAnimationFrame(pjRaf); pjRaf = null; for (const k in pjKeys) pjKeys[k] = false; }
+function pjRespawn(first){
+  const s = pj.sp, cp = pj.cp;
+  s.x = cp.x + 0.5 - s.w/2; s.y = cp.y + 1 - s.h;
+  Object.assign(s, {vx:0, vy:0, onGround:true, onCeil:false, zip:null, knock:0, invT:first ? 0 : 1.2, squash:0});
+  pj.state = "play";
+  pj.cam = Math.max(0, Math.min(pj.W - pj.vw, s.x - pj.vw*0.42));
+}
+function pjHud(){
+  $("pjName").textContent = `${pj.name} ${pj.lvl + 1}/${PJ_LEVELS.length}`;
+  $("pjO").textContent = `${pj.got.o}/${pj.all.o}`;
+  $("pjJ").textContent = `${pj.got.j}/${pj.all.j}`;
+  $("pjC").textContent = `${pj.got.$}/${pj.all.$}`;
+}
+function renderPajbar(){
+  $("pajbar").querySelectorAll("[data-pjl]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.pjl === pjLvl)));
+}
+function setupPajbar(){
+  $("pajbar").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    b.blur(); soundTap();
+    if (b.dataset.pjl !== undefined) startPaj(+b.dataset.pjl);
+    if (b.id === "pjRestart") startPaj(pjLvl);
+  });
+  const pad = $("pjPad");
+  const set = (b, on) => {
+    const k = b.dataset.k; b.classList.toggle("on", on);
+    if (on && !pjKeys[k] && k in pjPress) pjPress[k] = true;
+    pjKeys[k] = on;
+  };
+  pad.querySelectorAll("button").forEach(b => {
+    b.addEventListener("pointerdown", e => { e.preventDefault(); initAudio(); try { b.setPointerCapture(e.pointerId); } catch {} set(b, true); });
+    ["pointerup", "pointercancel", "lostpointercapture"].forEach(ev => b.addEventListener(ev, () => set(b, false)));
+    b.addEventListener("contextmenu", e => e.preventDefault());
+  });
+  renderPajbar();
+}
+const PJ_KEYMAP = {ArrowLeft:"L", a:"L", A:"L", ArrowRight:"R", d:"R", D:"R", " ":"J", ArrowUp:"J", w:"J", W:"J",
+                   ArrowDown:"D", s:"D", S:"D", x:"Z", X:"Z", Shift:"Z", Enter:"Z"};
+document.addEventListener("keydown", e => {
+  if (mode !== "paj" || !pj || !$("startScreen").hidden || !$("endScreen").hidden) return;
+  const k = PJ_KEYMAP[e.key]; if (!k) return;
+  e.preventDefault();
+  if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+  if (!pjKeys[k] && k in pjPress) pjPress[k] = true;
+  pjKeys[k] = true;
+});
+document.addEventListener("keyup", e => { const k = PJ_KEYMAP[e.key]; if (k) pjKeys[k] = false; });
+window.addEventListener("blur", () => { for (const k in pjKeys) pjKeys[k] = false; });
+
+/* --- dźwięki --- */
+function pjSweep(f0, f1, dur, type = "square", vol = 0.06, delay = 0){
+  if (!ctx) return;
+  const t = ctx.currentTime + delay, o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(sfxGain); o.start(t); o.stop(t + dur + 0.03);
+}
+function pjSfx(k){
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  if (k === "jump") pjSweep(330, 700, 0.14, "square", 0.05);
+  else if (k === "zip") pjSweep(400, 1300, 0.22, "triangle", 0.12);
+  else if (k === "stick") { tone(mtof(84), t, 0.07, {type:"triangle", vol:0.12}); }
+  else if (k === "nozip") pjSweep(300, 180, 0.15, "triangle", 0.08);
+  else if (k === "o" || k === "j") { tone(mtof(k === "o" ? 84 : 81), t, 0.08, {type:"triangle", vol:0.18}); tone(mtof(k === "o" ? 91 : 88), t + 0.06, 0.14, {type:"triangle", vol:0.18}); }
+  else if (k === "$") { tone(mtof(83), t, 0.07, {type:"square", vol:0.07}); tone(mtof(88), t + 0.07, 0.3, {type:"square", vol:0.07}); }
+  else if (k === "stomp") pjSweep(500, 90, 0.16, "triangle", 0.2);
+  else if (k === "hurt") { tone(mtof(70), t, 0.1, {type:"square", vol:0.06}); tone(mtof(64), t + 0.1, 0.18, {type:"square", vol:0.06}); }
+  else if (k === "die") [76, 72, 67, 60].forEach((n, i) => tone(mtof(n), t + i*0.1, 0.14, {type:"triangle", vol:0.15}));
+  else if (k === "cp") [72, 76, 79].forEach((n, i) => tone(mtof(n), t + i*0.08, 0.16, {type:"triangle", vol:0.15}));
+  else if (k === "win") [72, 76, 79, 84, 79, 84].forEach((n, i) => tone(mtof(n), t + i*0.12, i === 5 ? 0.5 : 0.16, {type:"triangle", vol:0.18}));
+  else if (k === "drip") pjSweep(1200, 500, 0.08, "sine", 0.05);
+}
+
+/* --- fizyka --- */
+function pjMoveX(s, dx){
+  s.x += dx;
+  const r0 = Math.floor(s.y + 0.001), r1 = Math.floor(s.y + s.h - 0.001);
+  if (dx > 0){ const c = Math.floor(s.x + s.w); for (let r=r0; r<=r1; r++) if (pjSolid(c, r)){ s.x = c - s.w - 0.0001; s.vx = 0; return true; } }
+  else if (dx < 0){ const c = Math.floor(s.x); for (let r=r0; r<=r1; r++) if (pjSolid(c, r)){ s.x = c + 1.0001; s.vx = 0; return true; } }
+  return false;
+}
+function pjMoveY(s, dy){
+  const prevBottom = s.y + s.h;
+  s.y += dy;
+  const c0 = Math.floor(s.x + 0.001), c1 = Math.floor(s.x + s.w - 0.001);
+  if (dy > 0){
+    const r = Math.floor(s.y + s.h);
+    for (let c=c0; c<=c1; c++) if (pjSolid(c, r) || (pjWeb(c, r) && prevBottom <= r + 0.02)){ s.y = r - s.h; s.vy = 0; s.onGround = true; return true; }
+  } else if (dy < 0){
+    const r = Math.floor(s.y);
+    for (let c=c0; c<=c1; c++) if (pjSolid(c, r)){ s.y = r + 1; s.vy = 0; return true; }
+  }
+  return false;
+}
+function pjCeilAbove(s){ return pjCeil(Math.floor(s.x + s.w/2), Math.floor(s.y + 0.001) - 1); }
+function pjZip(){
+  const s = pj.sp; if (s.zip || s.onCeil) return;
+  const cx = s.x + s.w/2, c = Math.floor(cx), top = Math.floor(s.y);
+  for (let r = top - 1; r >= top - PJ_REACH; r--){
+    if (r < 0 && pj.zone !== "tunel") break;
+    if (pjCeil(c, r)){
+      s.zip = {toY:r + 1, ax:cx}; s.vx = 0; s.vy = 0; s.onGround = false;
+      pjSfx("zip"); return;
+    }
+  }
+  pj.miss = {x:cx, y:s.y, t:pj.t}; pjSfx("nozip");
+}
+function pjDrop(){ const s = pj.sp; s.onCeil = false; s.vy = 1.5; s.squash = -0.6; pjSfx("jump"); }
+function pjDie(){
+  if (pj.state !== "play") return;
+  pj.state = "dead"; pj.deadT = pj.t; pj.falls++;
+  const s = pj.sp; pjBurst(s.x + s.w/2, Math.min(s.y + s.h/2, PJ_ROWS - 0.5), "#5B477E", 14);
+  pjSfx("die");
+}
+function pjHurt(fromX){
+  const s = pj.sp;
+  if (s.invT > 0 || pj.state !== "play") return;
+  s.invT = 1.5; s.knock = 0.35; s.onCeil = false; s.zip = null;
+  s.vy = -7; s.vx = (s.x + s.w/2 < fromX ? -1 : 1)*6;
+  pj.ouch++; pjSfx("hurt");
+  pjBurst(s.x + s.w/2, s.y + s.h/2, "#FFFFFF", 8);
+  pj.pops.push({x:s.x + s.w/2, y:s.y - 0.2, text:"Au!", t:pj.t, c:"#EF6A4C"});
+}
+function pjBurst(x, y, color, n){
+  for (let i=0; i<n; i++){ const a = Math.random()*Math.PI*2, v = rand(2, 6); pj.fx.push({x, y, vx:Math.cos(a)*v, vy:Math.sin(a)*v - 2, life:rand(0.4, 0.8), max:0.8, c:color, r:rand(0.05, 0.11)}); }
+}
+function pjUpdate(dt){
+  const s = pj.sp, I = pjKeys, P = {...pjPress};
+  pjPress.J = pjPress.D = pjPress.Z = false;
+  pj.t += dt;
+  pjEnemies(dt);
+  pjEffects(dt);
+  if (pj.state === "dead"){ if (pj.t > pj.deadT + 0.9) pjRespawn(); return; }
+  if (pj.state === "win"){
+    s.vx *= 0.9;
+    if (pj.t > pj.winT + 3.4) pjNextLevel();
+    return;
+  }
+  const dir = s.knock > 0 ? 0 : (I.R ? 1 : 0) - (I.L ? 1 : 0);
+  if (dir) s.face = dir;
+  s.invT = Math.max(0, s.invT - dt); s.knock = Math.max(0, s.knock - dt);
+  s.squash *= Math.pow(0.0005, dt);
+  s.coyote = s.onGround ? 0.1 : Math.max(0, s.coyote - dt);
+
+  if (s.zip){
+    const hit = pjMoveY(s, -PJ_ZIP*dt);
+    if (s.y <= s.zip.toY + 0.001 || hit){
+      s.y = Math.max(s.y, s.zip.toY); s.zip = null;
+      if (pjCeilAbove(s)){ s.onCeil = true; s.vx = 0; s.vy = 0; s.squash = 0.8; pjSfx("stick"); }
+      else s.vy = 0;
+    }
+  } else if (s.onCeil){
+    if (P.J || P.D || P.Z) pjDrop();
+    else {
+      s.vx += (dir*PJ_RUN*0.85 - s.vx)*Math.min(1, dt*14);
+      const px = s.x;
+      pjMoveX(s, s.vx*dt);
+      if (!pjCeilAbove(s)){ s.x = px; s.vx = 0; }
+      s.walk += Math.abs(s.vx)*dt;
+    }
+  } else {
+    s.vx += (dir*PJ_RUN - s.vx)*Math.min(1, dt*(s.knock > 0 ? 0 : s.onGround ? 16 : 9));
+    if (P.J){
+      if (s.onGround || s.coyote > 0){ s.vy = -PJ_JUMP; s.onGround = false; s.coyote = 0; s.squash = -1; pjSfx("jump"); }
+      else pjZip();
+    } else if (P.Z) pjZip();
+    if (!s.zip){
+      if (!I.J && s.vy < -6 && s.knock <= 0) s.vy = -6;
+      s.vy = Math.min(18, s.vy + PJ_GRAV*dt);
+      pjMoveX(s, s.vx*dt);
+      const wasAir = !s.onGround;
+      s.onGround = false;
+      pjMoveY(s, s.vy*dt);
+      if (s.onGround && wasAir) s.squash = 1;
+      if (s.onGround) s.walk += Math.abs(s.vx)*dt;
+    }
+  }
+
+  // kolce i przepaść
+  const c0 = Math.floor(s.x), c1 = Math.floor(s.x + s.w - 0.001), r0 = Math.floor(s.y), r1 = Math.floor(s.y + s.h - 0.001);
+  for (let c=c0; c<=c1; c++) for (let r=r0; r<=r1; r++) if (pjTile(c, r) === "^" && s.y + s.h > r + 0.5) pjDie();
+  if (s.y > PJ_ROWS + 0.5) pjDie();
+  if (pj.state !== "play") return;
+
+  // zbieranie
+  const sx = s.x + s.w/2, sy = s.y + s.h/2;
+  for (const it of pj.items){
+    if (it.taken || Math.abs(it.x - sx) > 0.62 || Math.abs(it.y - sy) > 0.62) continue;
+    it.taken = true; pj.got[it.k]++; pjSfx(it.k); pjHud();
+    pjBurst(it.x, it.y, it.k === "o" ? "#E8343F" : it.k === "j" ? "#4659C2" : "#F5C542", 8);
+    pj.pops.push({x:it.x, y:it.y - 0.3, text:"+1", t:pj.t, c:it.k === "$" ? "#C9921C" : "#FFFFFF"});
+  }
+  // wrogowie i krople
+  for (const e of pj.enemies){
+    if (e.k === "a" && e.dead) continue;
+    const ex = e.x, ey = e.k === "a" ? e.y - 0.25 : e.y, hw = e.k === "a" ? 0.4 : 0.34, hh = e.k === "a" ? 0.25 : 0.27;
+    if (Math.abs(ex - sx) > hw + 0.33 || Math.abs(ey - sy) > hh + 0.33) continue;
+    if (e.k === "a" && !s.onCeil && s.vy > 0 && s.y + s.h - (e.y - 0.5) < 0.38){
+      e.dead = pj.t; s.vy = -9.5; pjSfx("stomp"); pjBurst(ex, ey, "#3A2222", 8);
+      pj.pops.push({x:ex, y:ey - 0.5, text:"Hop!", t:pj.t, c:"#FFFFFF"});
+    } else pjHurt(ex);
+  }
+  for (const d of pj.drops){
+    if (d.g < 0.6 || Math.abs(d.x - sx) > 0.42 || Math.abs(d.y - sy) > 0.45) continue;
+    d.dead = true; pjHurt(d.x);
+  }
+  // punkty kontrolne i meta
+  for (const cp of pj.cps) if (!cp.on && sx >= cp.x + 0.3){
+    cp.on = true; pj.cp = cp; pjSfx("cp");
+    pj.pops.push({x:cp.x + 0.5, y:cp.y - 1, text:"✔", t:pj.t, c:"#2FA35A"});
+  }
+  if (pj.fin && sx >= pj.fin.x + 0.4 && pj.state === "play"){
+    pj.state = "win"; pj.winT = pj.t; pjSfx("win");
+    if (typeof fireworksShow === "function") fireworksShow();
+  }
+}
+function pjEnemies(dt){
+  for (const e of pj.enemies){
+    if (e.k === "a"){
+      if (e.dead) continue;
+      const nx = e.x + e.dir*1.5*dt, fc = Math.floor(nx + e.dir*0.45);
+      if (pjSolid(fc, Math.floor(e.y - 0.3)) || !pjCeil(fc, Math.floor(e.y + 0.05)) || Math.abs(nx - e.x0) > 3) e.dir *= -1;
+      else e.x = nx;
+      e.walk += dt;
+    } else {
+      const px = e.x;
+      e.x = e.x0 + Math.sin(pj.t*0.8 + e.ph)*2.2;
+      e.y = e.y0 + Math.sin(pj.t*2.6 + e.ph)*0.3;
+      if (Math.abs(e.x - px) > 1e-4) e.vx = Math.sign(e.x - px);
+    }
+  }
+  for (const d of pj.drips) if (pj.t >= d.next){ pj.drops.push({x:d.x, y:d.y, vy:0, g:0}); d.next = pj.t + 2.4 + pjHash(d.x*10, Math.floor(pj.t))*1.2; }
+  for (const d of pj.drops){
+    if (d.g < 1){ d.g = Math.min(1, d.g + dt/0.8); continue; }
+    d.vy = Math.min(14, d.vy + 22*dt); d.y += d.vy*dt;
+    const c = Math.floor(d.x), r = Math.floor(d.y + 0.15);
+    if (pjSolid(c, r) || (pjWeb(c, r) && d.y + 0.15 - r < 0.3) || d.y > PJ_ROWS + 1){
+      d.dead = true;
+      if (d.y < PJ_ROWS){ for (let i=0; i<5; i++) pj.fx.push({x:d.x, y:r, vx:rand(-2.5, 2.5), vy:rand(-4, -1.5), life:0.4, max:0.4, c:"#9FD0FF", r:0.05}); if (Math.abs(d.x - pj.cam - pj.vw/2) < pj.vw/2) pjSfx("drip"); }
+    }
+  }
+  pj.drops = pj.drops.filter(d => !d.dead);
+}
+function pjEffects(dt){
+  for (const p of pj.fx){ p.vy += 14*dt; p.x += p.vx*dt; p.y += p.vy*dt; p.life -= dt; }
+  pj.fx = pj.fx.filter(p => p.life > 0);
+  pj.pops = pj.pops.filter(p => pj.t - p.t < 1);
+  const s = pj.sp;
+  let target = s.x + s.w/2 - pj.vw*0.42;
+  target = Math.max(0, Math.min(Math.max(0, pj.W - pj.vw), target));
+  pj.cam += (target - pj.cam)*Math.min(1, dt*6);
+}
+function pjNextLevel(){
+  const sum = {o:pj.sum.o + pj.got.o, j:pj.sum.j + pj.got.j, $:pj.sum.$ + pj.got.$, ouch:pj.sum.ouch + pj.ouch, falls:pj.sum.falls + pj.falls};
+  if (pj.lvl < PJ_LEVELS.length - 1){ startPaj(pj.lvl + 1, sum); return; }
+  pj.state = "over";
+  $("endFaces").textContent = "🕷️🍓🫐";
+  $("endTitle").textContent = "Pajączek w domu!";
+  $("endText").innerHTML = `Zebrane: <b>${sum.o} ${pjPl(sum.o, "poziomka", "poziomki", "poziomek")}</b>, <b>${sum.j} ${pjPl(sum.j, "jagoda", "jagody", "jagód")}</b> i <b>${sum.$} ${pjPl(sum.$, "moneta", "monety", "monet")}</b>.`;
+  $("endScreen").hidden = false;
+  pjLvl = 0; store.set("pajLvl", 0);
+}
+function pjFrame(now){
+  pjRaf = requestAnimationFrame(pjFrame);
+  const dt = Math.min(1/30, Math.max(0, (now - pjLast)/1000)); pjLast = now;
+  if (mode !== "paj" || !pj) return;
+  if ($("startScreen").hidden && $("endScreen").hidden && pj.state !== "over"){
+    const steps = dt > 1/50 ? 2 : 1;
+    for (let i=0; i<steps; i++) pjUpdate(dt/steps);
+  }
+  pjDraw();
+}
+
+/* --- rysowanie --- */
+function pjDraw(){
+  const cv = $("pajCanvas"), w = cv.clientWidth, h = cv.clientHeight;
+  if (!w || !h) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if (cv.width !== Math.round(w*dpr) || cv.height !== Math.round(h*dpr)){ cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr); }
+  const c = cv.getContext("2d"), T = h/PJ_ROWS;
+  pj.T = T; pj.vw = w/T;
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const cam = Math.round(pj.cam*T)/T, t = pj.t;
+  pjBackground(c, w, h, T, cam, t);
+  c.save(); c.translate(-cam*T, 0);
+  const cA = Math.max(0, Math.floor(cam) - 1), cB = Math.min(pj.W - 1, Math.ceil(cam + pj.vw) + 1);
+  for (let col=cA; col<=cB; col++) for (let r=0; r<PJ_ROWS; r++) if (pj.grid[r][col] === "t") pjTileDraw(c, "t", col, r, T);
+  for (let col=cA; col<=cB; col++) for (let r=0; r<PJ_ROWS; r++){ const k = pj.grid[r][col]; if (k !== "." && k !== "t") pjTileDraw(c, k, col, r, T); }
+  for (const cp of pj.cps) pjDrawCp(c, cp, T, t);
+  if (pj.fin) pjDrawFinish(c, pj.fin, T, t);
+  for (const it of pj.items) if (!it.taken && it.x > cam - 1 && it.x < cam + pj.vw + 1) pjDrawItem(c, it.k, it.x*T, (it.y + Math.sin(t*3 + it.x)*0.06)*T, T, t);
+  for (const e of pj.enemies) pjDrawEnemy(c, e, T, t);
+  for (const d of pj.drops) pjDrawDrop(c, d, T);
+  pjDrawSpider(c, T, t);
+  for (const p of pj.fx){ c.globalAlpha = Math.max(0, p.life/p.max); c.fillStyle = p.c; c.beginPath(); c.arc(p.x*T, p.y*T, p.r*T, 0, Math.PI*2); c.fill(); }
+  c.globalAlpha = 1;
+  const font = getComputedStyle(document.body).fontFamily;
+  for (const p of pj.pops){
+    const a = (t - p.t);
+    c.globalAlpha = 1 - a; c.font = `800 ${Math.round(T*0.55)}px ${font}`; c.textAlign = "center"; c.textBaseline = "middle";
+    c.lineWidth = 4; c.strokeStyle = "rgba(36,50,74,.8)"; c.strokeText(p.text, p.x*T, (p.y - a*0.8)*T);
+    c.fillStyle = p.c; c.fillText(p.text, p.x*T, (p.y - a*0.8)*T);
+  }
+  c.globalAlpha = 1;
+  c.restore();
+  if (pj.zone === "tunel") pjDarkness(c, w, h, T, cam, t);
+  pjOverlayText(c, w, h, T, t, font);
+}
+function pjBackground(c, w, h, T, cam, t){
+  const z = pj.zone;
+  if (z === "laka"){
+    let g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#8FD0FF"); g.addColorStop(1, "#E4F5FF");
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+    c.fillStyle = "rgba(255,224,122,.35)"; c.beginPath(); c.arc(w - T*1.8, T*1.6, T*1.4, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#FFE07A"; c.beginPath(); c.arc(w - T*1.8, T*1.6, T*0.95, 0, Math.PI*2); c.fill();
+    const pc = cam*0.25;
+    c.fillStyle = "rgba(255,255,255,.92)";
+    for (let i = Math.floor(pc/9) - 1; i < (pc + pj.vw)/9 + 1; i++){
+      const x = (i*9 + pjHash(i, 1)*4 - pc)*T, y = (0.8 + pjHash(i, 2)*2.4)*T, s = T*(0.5 + pjHash(i, 3)*0.3);
+      c.beginPath(); c.ellipse(x, y, s*1.8, s*0.8, 0, 0, Math.PI*2); c.ellipse(x - s*0.8, y + s*0.1, s, s*0.6, 0, 0, Math.PI*2); c.ellipse(x + s*0.7, y - s*0.35, s*1.1, s*0.8, 0, 0, Math.PI*2); c.fill();
+    }
+    [[0.45, "#B5E2A6", 0.9], [0.65, "#9AD38E", 0.6]].forEach(([par, col, base]) => {
+      c.fillStyle = col; c.beginPath(); c.moveTo(0, h);
+      for (let x = 0; x <= w + 10; x += 10){ const wx = x/T + cam*par; c.lineTo(x, h*(0.5 + base*0.12) - Math.sin(wx*0.31)*T*0.9 - Math.sin(wx*0.11 + 1)*T*0.7); }
+      c.lineTo(w, h); c.fill();
+    });
+  } else if (z === "tunel"){
+    const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#6A4A33"); g.addColorStop(1, "#4E3524");
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+    const pc = cam*0.6;
+    c.fillStyle = "rgba(40,24,14,.25)";
+    for (let i = Math.floor(pc/3) - 1; i < (pc + pj.vw)/3 + 1; i++){
+      const x = (i*3 + pjHash(i, 7)*2 - pc)*T, y = (3 + pjHash(i, 8)*7)*T;
+      c.beginPath(); c.ellipse(x, y, T*(0.2 + pjHash(i, 9)*0.4), T*(0.12 + pjHash(i, 10)*0.2), 0, 0, Math.PI*2); c.fill();
+    }
+  } else {
+    const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#24305A"); g.addColorStop(0.6, "#4D4079"); g.addColorStop(1, "#8C6B9E");
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+    const ps = cam*0.08;
+    for (let i = Math.floor(ps) - 1; i < ps + pj.vw + 1; i++) for (let k=0; k<2; k++){
+      const x = (i + pjHash(i, k + 20) - ps)*T, y = pjHash(i, k + 30)*h*0.6;
+      c.globalAlpha = 0.4 + 0.5*Math.abs(Math.sin(t*1.5 + i*3 + k)); c.fillStyle = "#FFFFFF"; c.fillRect(x, y, 2, 2);
+    }
+    c.globalAlpha = 1;
+    c.fillStyle = "#FFF6D8"; c.beginPath(); c.arc(w - T*2, T*1.6, T*0.9, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#24305A"; c.beginPath(); c.arc(w - T*1.65, T*1.4, T*0.8, 0, Math.PI*2); c.fill();
+    const pw = cam*0.4;
+    c.strokeStyle = "rgba(255,255,255,.16)"; c.lineWidth = 1.5;
+    for (let i = Math.floor(pw/13) - 1; i < (pw + pj.vw)/13 + 1; i++){
+      const cx = (i*13 + 4 + pjHash(i, 40)*4 - pw)*T, cy = (3.5 + pjHash(i, 41)*3)*T, R = T*(2.5 + pjHash(i, 42));
+      c.beginPath();
+      for (let a=0; a<10; a++){ const an = a/10*Math.PI*2; c.moveTo(cx, cy); c.lineTo(cx + Math.cos(an)*R, cy + Math.sin(an)*R); }
+      for (let ring=1; ring<=4; ring++){ const rr = R*ring/4.4; for (let a=0; a<=10; a++){ const an = a/10*Math.PI*2; const px = cx + Math.cos(an)*rr, py = cy + Math.sin(an)*rr; a ? c.lineTo(px, py) : c.moveTo(px, py); } }
+      c.stroke();
+    }
+  }
+}
+function pjTileDraw(c, k, col, r, T){
+  const x = col*T, y = r*T, z = pj.zone, hs = pjHash(col, r);
+  const open = (cc, rr) => !pjSolid(cc, rr) && pjTile(cc, rr) !== "L";
+  if (k === "#"){
+    c.fillStyle = z === "laka" ? "#9A6A43" : z === "tunel" ? "#3F2B1E" : "#7A5236";
+    c.fillRect(x, y, T + 0.6, T + 0.6);
+    if (z === "siec"){ c.strokeStyle = "#5E3E27"; c.lineWidth = Math.max(1, T*0.04); c.beginPath(); c.moveTo(x, y + T*(0.35 + hs*0.2)); c.lineTo(x + T, y + T*(0.4 + hs*0.2)); c.moveTo(x, y + T*0.78); c.lineTo(x + T, y + T*0.72); c.stroke(); }
+    else if (hs < 0.6){ c.fillStyle = z === "laka" ? "#86593A" : "#54392A"; c.beginPath(); c.ellipse(x + T*(0.25 + hs*0.6), y + T*(0.35 + pjHash(r, col)*0.4), T*0.14, T*0.09, 0, 0, Math.PI*2); c.fill(); }
+    if (open(col, r - 1) && r > 0){
+      if (z === "tunel"){ c.fillStyle = "#5A3F2C"; c.fillRect(x, y, T + 0.6, T*0.12); }
+      else {
+        c.fillStyle = z === "laka" ? "#5CB85F" : "#6E9E4A"; c.fillRect(x, y, T + 0.6, T*0.24);
+        c.beginPath(); for (let i=0; i<3; i++) c.arc(x + T*(0.17 + i*0.33), y + T*0.22, T*0.13, 0, Math.PI); c.fill();
+        if (z === "laka" && hs > 0.72 && !pjTile(col, r - 1).match(/[\^\-]/)){
+          const fx = x + T*(0.2 + pjHash(col, 99)*0.6), fy = y - T*0.28;
+          c.strokeStyle = "#3E9A4F"; c.lineWidth = 2; c.beginPath(); c.moveTo(fx, y); c.lineTo(fx, fy); c.stroke();
+          c.fillStyle = ["#FFFFFF", "#F6C445", "#E8669A", "#9F67C2"][Math.floor(pjHash(col, 98)*4)];
+          for (let i=0; i<5; i++){ const a = i/5*Math.PI*2; c.beginPath(); c.arc(fx + Math.cos(a)*T*0.08, fy + Math.sin(a)*T*0.08, T*0.07, 0, Math.PI*2); c.fill(); }
+          c.fillStyle = "#F5B83D"; c.beginPath(); c.arc(fx, fy, T*0.05, 0, Math.PI*2); c.fill();
+        }
+      }
+    }
+    if (z === "tunel" && open(col, r + 1) && hs > 0.55){
+      c.strokeStyle = "#8A6544"; c.lineWidth = Math.max(1.5, T*0.04); c.beginPath();
+      const rx = x + T*(0.2 + hs*0.5); c.moveTo(rx, y + T); c.quadraticCurveTo(rx + T*0.12, y + T*1.2, rx - T*0.04, y + T*1.42); c.stroke();
+    }
+  } else if (k === "L"){
+    c.fillStyle = "#3F9A50"; c.fillRect(x, y, T + 0.6, T + 0.6);
+    c.fillStyle = "#55B565";
+    for (let i=0; i<2; i++){ c.beginPath(); c.arc(x + T*(0.25 + pjHash(col + i, r)*0.5), y + T*(0.25 + pjHash(r + i, col)*0.5), T*0.18, 0, Math.PI*2); c.fill(); }
+    c.fillStyle = "#3F9A50";
+    if (pjTile(col, r - 1) !== "L") for (let i=0; i<3; i++){ c.beginPath(); c.arc(x + T*(0.17 + i*0.33), y + T*0.05, T*0.2, 0, Math.PI*2); c.fill(); }
+    if (pjTile(col, r + 1) !== "L") for (let i=0; i<3; i++){ c.beginPath(); c.arc(x + T*(0.17 + i*0.33), y + T*0.95, T*0.2, 0, Math.PI*2); c.fill(); }
+  } else if (k === "t"){
+    c.fillStyle = "#8B5A35"; c.fillRect(x + T*0.28, y, T*0.44, T + 0.6);
+    c.fillStyle = "#74492A"; c.fillRect(x + T*0.42, y, T*0.06, T + 0.6);
+  } else if (k === "-"){
+    const y0 = y + T*0.16;
+    c.strokeStyle = "rgba(255,255,255,.95)"; c.lineWidth = Math.max(1.6, T*0.055); c.lineCap = "round";
+    c.beginPath(); c.moveTo(x, y0); c.quadraticCurveTo(x + T/2, y0 + T*0.09, x + T, y0); c.stroke();
+    c.strokeStyle = "rgba(255,255,255,.45)"; c.lineWidth = Math.max(1, T*0.03);
+    c.beginPath(); c.moveTo(x, y0 + T*0.12); c.quadraticCurveTo(x + T/2, y0 + T*0.22, x + T, y0 + T*0.12);
+    c.moveTo(x + T*0.3, y0 + T*0.04); c.lineTo(x + T*0.45, y0 + T*0.16); c.stroke();
+    if (hs < 0.4){ c.fillStyle = "rgba(200,232,255,.95)"; c.beginPath(); c.arc(x + T*(0.2 + hs*1.5), y0 + T*0.08, T*0.05, 0, Math.PI*2); c.fill(); }
+  } else if (k === "^"){
+    c.fillStyle = z === "laka" ? "#6F7F55" : z === "tunel" ? "#A99686" : "#9AA0B5";
+    c.strokeStyle = z === "laka" ? "#4E5C38" : "#6A5A50"; c.lineWidth = 1.5;
+    c.beginPath();
+    for (let i=0; i<3; i++){ c.moveTo(x + i*T/3, y + T + 0.5); c.lineTo(x + (i + 0.5)*T/3, y + T*0.42); c.lineTo(x + (i + 1)*T/3, y + T + 0.5); }
+    c.fill(); c.stroke();
+    c.fillStyle = "#F4F1EA";
+    for (let i=0; i<3; i++){ c.beginPath(); c.moveTo(x + (i + 0.5)*T/3, y + T*0.42); c.lineTo(x + (i + 0.36)*T/3, y + T*0.58); c.lineTo(x + (i + 0.64)*T/3, y + T*0.58); c.fill(); }
+  }
+}
+function pjDrawCp(c, cp, T, t){
+  const x = (cp.x + 0.5)*T, yb = (cp.y + 1)*T;
+  c.strokeStyle = "#E8E2D6"; c.lineWidth = Math.max(2, T*0.07); c.beginPath(); c.moveTo(x, yb); c.lineTo(x, yb - T*1.3); c.stroke();
+  const wv = Math.sin(t*4)*T*0.06;
+  c.fillStyle = cp.on ? "#2FA35A" : "#B9C3D3";
+  c.beginPath(); c.moveTo(x, yb - T*1.3); c.quadraticCurveTo(x + T*0.35, yb - T*1.2 + wv, x + T*0.65, yb - T*1.1); c.lineTo(x, yb - T*0.85); c.fill();
+}
+function pjDrawFinish(c, f, T, t){
+  const x = (f.x + 0.5)*T, yb = (f.y + 1)*T, top = yb - T*2.8;
+  c.strokeStyle = "#F4F1EA"; c.lineWidth = Math.max(3, T*0.1); c.beginPath(); c.moveTo(x, yb); c.lineTo(x, top); c.stroke();
+  c.fillStyle = "#F5B83D"; c.beginPath(); c.arc(x, top, T*0.14, 0, Math.PI*2); c.fill();
+  const wv = Math.sin(t*4)*T*0.1;
+  c.fillStyle = "#EF6A4C";
+  c.beginPath(); c.moveTo(x, top + T*0.1); c.quadraticCurveTo(x + T*0.7, top + wv, x + T*1.4, top + T*0.25 + wv); c.lineTo(x + T*1.4, top + T*1.0 + wv); c.quadraticCurveTo(x + T*0.7, top + T*0.85, x, top + T*1.05); c.fill();
+  pjDrawItem(c, "o", x + T*0.7, top + T*0.55 + wv*0.6, T*0.9, t);
+}
+function pjDrawItem(c, k, x, y, T, t){
+  if (k === "o"){
+    const s = T*0.3;
+    c.fillStyle = "#E8343F";
+    c.beginPath(); c.moveTo(x, y + s);
+    c.bezierCurveTo(x - s*1.25, y + s*0.1, x - s*0.95, y - s*0.95, x, y - s*0.55);
+    c.bezierCurveTo(x + s*0.95, y - s*0.95, x + s*1.25, y + s*0.1, x, y + s); c.fill();
+    c.fillStyle = "#FFE07A";
+    [[-0.35, -0.2], [0.3, -0.25], [0, 0.05], [-0.3, 0.3], [0.28, 0.3], [0, 0.55]].forEach(([a, b]) => { c.beginPath(); c.arc(x + a*s, y + b*s, Math.max(1, s*0.07), 0, Math.PI*2); c.fill(); });
+    c.fillStyle = "#3E9A4F";
+    for (let i=0; i<4; i++){ c.beginPath(); c.ellipse(x + (i - 1.5)*s*0.3, y - s*0.7, s*0.28, s*0.12, (i - 1.5)*0.5, 0, Math.PI*2); c.fill(); }
+  } else if (k === "j"){
+    [[-0.09, 0.04, 0.2], [0.12, -0.07, 0.17]].forEach(([dx, dy, r]) => {
+      const bx = x + dx*T, by = y + dy*T, R = r*T;
+      c.fillStyle = "#3D4FA8"; c.beginPath(); c.arc(bx, by, R, 0, Math.PI*2); c.fill();
+      c.fillStyle = "rgba(255,255,255,.35)"; c.beginPath(); c.arc(bx - R*0.35, by - R*0.35, R*0.3, 0, Math.PI*2); c.fill();
+      c.strokeStyle = "#1E2560"; c.lineWidth = Math.max(1, R*0.12); c.beginPath();
+      for (let i=0; i<5; i++){ const a = i/5*Math.PI*2; c.moveTo(bx, by - R*0.72); c.lineTo(bx + Math.cos(a)*R*0.22, by - R*0.72 + Math.sin(a)*R*0.22); }
+      c.stroke();
+    });
+    c.fillStyle = "#3E9A4F"; c.beginPath(); c.ellipse(x + T*0.02, y - T*0.24, T*0.12, T*0.05, -0.4, 0, Math.PI*2); c.fill();
+  } else {
+    const sc = Math.max(0.15, Math.abs(Math.cos(t*3 + x*0.01))), R = T*0.27;
+    c.fillStyle = "#F5C542"; c.strokeStyle = "#C9921C"; c.lineWidth = Math.max(1.5, T*0.05);
+    c.beginPath(); c.ellipse(x, y, R*sc, R, 0, 0, Math.PI*2); c.fill(); c.stroke();
+    c.fillStyle = "#FFE48A"; c.beginPath(); c.ellipse(x, y, R*0.6*sc, R*0.6, 0, 0, Math.PI*2); c.fill();
+  }
+}
+function pjDrawEnemy(c, e, T, t){
+  if (e.k === "a"){
+    let alpha = 1, flat = 1;
+    if (e.dead){ const a = pj.t - e.dead; if (a > 0.6) return; alpha = 1 - a/0.6; flat = 0.35; }
+    const x = e.x*T, y = e.y*T;
+    c.save(); c.globalAlpha = alpha; c.translate(x, y); c.scale(e.dir, flat); c.translate(0, -T*0.02);
+    const st = Math.sin(e.walk*16);
+    c.strokeStyle = "#2A1818"; c.lineWidth = Math.max(1.5, T*0.04);
+    c.beginPath();
+    for (let i=0; i<3; i++){ const lx = (i - 1)*T*0.16, sw = (i%2 ? st : -st)*T*0.05; c.moveTo(lx, -T*0.18); c.lineTo(lx - T*0.06 + sw, 0); }
+    c.moveTo(T*0.3, -T*0.3); c.quadraticCurveTo(T*0.38, -T*0.48, T*0.46, -T*0.44); c.stroke();
+    c.fillStyle = "#3A2222";
+    c.beginPath(); c.ellipse(-T*0.22, -T*0.22, T*0.17, T*0.13, 0, 0, Math.PI*2); c.fill();
+    c.beginPath(); c.ellipse(0, -T*0.22, T*0.1, T*0.08, 0, 0, Math.PI*2); c.fill();
+    c.beginPath(); c.arc(T*0.2, -T*0.26, T*0.11, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#FFFFFF"; c.beginPath(); c.arc(T*0.24, -T*0.29, T*0.035, 0, Math.PI*2); c.fill();
+    c.restore();
+  } else {
+    const x = e.x*T, y = e.y*T;
+    c.save(); c.translate(x, y); c.scale(e.vx < 0 ? -1 : 1, 1);
+    const fl = Math.abs(Math.sin(t*40));
+    c.fillStyle = "rgba(255,255,255,.75)";
+    c.beginPath(); c.ellipse(-T*0.05, -T*0.2, T*0.16, T*0.09*fl + T*0.02, -0.5, 0, Math.PI*2); c.fill();
+    c.beginPath(); c.ellipse(T*0.07, -T*0.22, T*0.13, T*0.07*fl + T*0.02, -0.3, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#2A2A2A"; c.beginPath(); c.moveTo(-T*0.3, 0); c.lineTo(-T*0.44, T*0.04); c.lineTo(-T*0.3, T*0.08); c.fill();
+    c.save(); c.beginPath(); c.ellipse(0, T*0.02, T*0.3, T*0.17, 0, 0, Math.PI*2); c.clip();
+    c.fillStyle = "#F6C445"; c.fillRect(-T*0.3, -T*0.2, T*0.6, T*0.4);
+    c.fillStyle = "#2A2A2A"; for (let i=0; i<3; i++) c.fillRect(-T*0.22 + i*T*0.14, -T*0.2, T*0.06, T*0.4);
+    c.restore();
+    c.fillStyle = "#2A2A2A"; c.beginPath(); c.arc(T*0.3, -T*0.01, T*0.1, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#FFFFFF"; c.beginPath(); c.arc(T*0.33, -T*0.04, T*0.035, 0, Math.PI*2); c.fill();
+    c.restore();
+  }
+}
+function pjDrawDrop(c, d, T){
+  const x = d.x*T, y = d.y*T, s = T*0.16*Math.max(0.2, d.g);
+  c.fillStyle = "rgba(130,195,255,.92)";
+  c.beginPath(); c.moveTo(x, y - s*0.2); c.quadraticCurveTo(x + s, y + s*1.1, x, y + s*1.6); c.quadraticCurveTo(x - s, y + s*1.1, x, y - s*0.2); c.fill();
+  c.fillStyle = "rgba(255,255,255,.7)"; c.beginPath(); c.arc(x - s*0.25, y + s*0.9, s*0.2, 0, Math.PI*2); c.fill();
+}
+function pjDrawSpider(c, T, t){
+  const s = pj.sp;
+  const cx = (s.x + s.w/2)*T;
+  if (s.zip){ c.strokeStyle = "rgba(255,255,255,.95)"; c.lineWidth = Math.max(1.5, T*0.04); c.beginPath(); c.moveTo(s.zip.ax*T, s.zip.toY*T); c.lineTo(cx, s.y*T); c.stroke(); }
+  if (pj.miss && pj.t - pj.miss.t < 0.4){
+    const a = (pj.t - pj.miss.t)/0.4;
+    c.strokeStyle = `rgba(255,255,255,${0.9 - a*0.9})`; c.lineWidth = Math.max(1.5, T*0.04);
+    c.beginPath(); c.moveTo(pj.miss.x*T, pj.miss.y*T); c.lineTo(pj.miss.x*T, (pj.miss.y - 1.8*Math.min(1, a*3))*T); c.stroke();
+  }
+  if (pj.state === "dead") return;
+  if (s.invT > 0 && Math.floor(s.invT*10)%2) c.globalAlpha = 0.45;
+  const H = s.h*T, bs = T*0.6;
+  c.save();
+  c.translate(cx, (s.y + s.h/2)*T);
+  if (s.onCeil) c.scale(1, -1);
+  if (s.face < 0) c.scale(-1, 1);
+  const q = s.squash*0.14;
+  c.translate(0, H/2); c.scale(1 + q, 1 - q); c.translate(0, -H/2);
+  // nóżki: po 4 z każdej strony, krótkie
+  const moving = Math.abs(s.vx) > 0.3 && (s.onGround || s.onCeil), air = !s.onGround && !s.onCeil;
+  c.strokeStyle = "#2A1F40"; c.lineWidth = Math.max(2, T*0.055); c.lineCap = "round"; c.lineJoin = "round";
+  const by = -H/2 + bs;
+  for (let i=0; i<8; i++){
+    const side = i < 4 ? -1 : 1, j = i < 4 ? i : 7 - i;
+    const lx = side*(bs/2 - T*0.03 - j*T*0.075);
+    const lift = moving ? Math.max(0, Math.sin(s.walk*9 + i*1.7))*T*0.07 : 0;
+    const spread = side*(T*0.05 + (3 - j)*T*0.035) + (air ? side*T*0.04 : 0);
+    c.beginPath(); c.moveTo(lx, by - T*0.04); c.lineTo(lx + spread*0.7, by + T*0.06 - lift); c.lineTo(lx + spread, H/2 - lift - (air ? T*0.04 : 0)); c.stroke();
+  }
+  // kwadratowy tułów
+  const g = c.createLinearGradient(0, -H/2, 0, by); g.addColorStop(0, "#6B56A0"); g.addColorStop(1, "#43336E");
+  c.fillStyle = g; c.beginPath();
+  if (c.roundRect) c.roundRect(-bs/2, -H/2, bs, bs, T*0.1); else c.rect(-bs/2, -H/2, bs, bs);
+  c.fill();
+  c.fillStyle = "rgba(255,255,255,.14)"; c.fillRect(-bs/2 + T*0.08, -H/2 + T*0.06, bs*0.35, T*0.06);
+  // oczy, policzki, uśmiech
+  const ey = -H/2 + bs*0.4;
+  [[-bs*0.08, 0.13], [bs*0.24, 0.12]].forEach(([ex, r]) => {
+    c.fillStyle = "#FFFFFF"; c.beginPath(); c.arc(ex, ey, T*r, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#1B1B2F"; c.beginPath(); c.arc(ex + T*0.04, ey + T*0.02, T*r*0.5, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#FFFFFF"; c.beginPath(); c.arc(ex + T*0.06, ey - T*0.01, T*r*0.17, 0, Math.PI*2); c.fill();
+  });
+  c.fillStyle = "rgba(232,102,154,.65)"; c.beginPath(); c.arc(-bs*0.3, ey + T*0.14, T*0.05, 0, Math.PI*2); c.arc(bs*0.4, ey + T*0.14, T*0.045, 0, Math.PI*2); c.fill();
+  c.strokeStyle = "#FFFFFF"; c.lineWidth = Math.max(1.5, T*0.035);
+  c.beginPath(); c.arc(bs*0.08, ey + T*0.12, T*0.08, 0.2, Math.PI - 0.2); c.stroke();
+  c.restore();
+  c.globalAlpha = 1;
+}
+function pjDarkness(c, w, h, T, cam, t){
+  const s = pj.sp, x = (s.x + s.w/2 - cam)*T, y = (s.y + s.h/2)*T;
+  const g = c.createRadialGradient(x, y, T*2.2, x, y, T*8);
+  g.addColorStop(0, "rgba(20,10,4,0)"); g.addColorStop(1, "rgba(20,10,4,.6)");
+  c.fillStyle = g; c.fillRect(0, 0, w, h);
+  for (let col = Math.floor(cam); col < cam + pj.vw + 1; col++){
+    if (pjHash(col, 77) > 0.35) continue;
+    const r = 3 + Math.floor(pjHash(col, 78)*2);
+    if (pjSolid(col, r)) continue;
+    const gx = (col + pjHash(col, 79) - cam)*T, gy = (r + 0.2 + Math.sin(t*1.3 + col)*0.1)*T;
+    c.globalAlpha = 0.5 + 0.5*Math.abs(Math.sin(t*2 + col));
+    c.fillStyle = "rgba(200,255,140,.35)"; c.beginPath(); c.arc(gx, gy, T*0.14, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#E6FF9A"; c.beginPath(); c.arc(gx, gy, T*0.05, 0, Math.PI*2); c.fill();
+  }
+  c.globalAlpha = 1;
+}
+function pjOverlayText(c, w, h, T, t, font){
+  if (pj.state === "win"){
+    const a = pj.t - pj.winT, sc = Math.min(1, 0.4 + a*2.5);
+    c.save(); c.translate(w/2, h*0.38); c.scale(sc, sc);
+    c.font = `800 ${Math.min(90, w*0.15)}px ${font}`; c.textAlign = "center"; c.textBaseline = "middle";
+    c.lineWidth = 10; c.strokeStyle = "#24324A"; c.strokeText("Brawo!", 0, 0);
+    c.fillStyle = "#FFE07A"; c.fillText("Brawo!", 0, 0);
+    c.font = `800 ${Math.min(30, w*0.055)}px ${font}`; c.lineWidth = 6;
+    const sub = pj.lvl < PJ_LEVELS.length - 1 ? `Dalej: ${PJ_LEVELS[pj.lvl + 1].name}` : "Koniec wyprawy!";
+    c.strokeText(sub, 0, Math.min(70, w*0.11)); c.fillStyle = "#FFFFFF"; c.fillText(sub, 0, Math.min(70, w*0.11));
+    c.restore();
+    return;
+  }
+  if (t < pj.introUntil){
+    c.save(); c.globalAlpha = Math.min(1, (pj.introUntil - t)*2);
+    c.font = `800 ${Math.min(72, w*0.13)}px ${font}`; c.textAlign = "center"; c.textBaseline = "middle";
+    c.lineWidth = 9; c.strokeStyle = "#24324A"; c.strokeText(pj.name, w/2, h*0.4);
+    c.fillStyle = "#FFFFFF"; c.fillText(pj.name, w/2, h*0.4);
+    c.restore();
+  }
+  if (t < pj.tipUntil && pj.lvl >= 0){
+    const fs = Math.max(13, Math.min(20, w*0.036));
+    c.save(); c.globalAlpha = Math.min(1, (pj.tipUntil - t)*1.5, t*3);
+    c.font = `700 ${fs}px ${font}`; c.textAlign = "center"; c.textBaseline = "middle";
+    const lines = pjWrap(c, PJ_LEVELS[pj.lvl].tip, w - 60);
+    const bw = Math.max(...lines.map(l => c.measureText(l).width)) + 28, bh = lines.length*fs*1.3 + 14;
+    c.fillStyle = "rgba(255,255,255,.93)"; c.beginPath();
+    if (c.roundRect) c.roundRect(w/2 - bw/2, 10, bw, bh, 14); else c.rect(w/2 - bw/2, 10, bw, bh);
+    c.fill();
+    c.fillStyle = "#24324A"; lines.forEach((l, i) => c.fillText(l, w/2, 10 + 7 + fs*0.65 + i*fs*1.3));
+    c.restore();
+  }
+}
+function pjWrap(c, text, maxW){
+  const out = []; let line = "";
+  for (const word of text.split(" ")){ const tr = line ? line + " " + word : word; if (c.measureText(tr).width > maxW && line){ out.push(line); line = word; } else line = tr; }
+  if (line) out.push(line);
+  return out;
+}
+
 function chooseLevel(m){
   const changed = m !== mode;
   if (m !== "dykt" && typeof dkStopSpeak === "function") dkStopSpeak();
   if (mode === "lap" && m !== "lap") lapClear();
   if (mode === "pilk" && m !== "pilk") stopPilk();
+  if (mode === "paj" && m !== "paj") stopPaj();
   mode = m;
+  document.body.classList.toggle("pajmode", m === "paj");
+  $("pajbar").hidden = m !== "paj";
   document.body.classList.toggle("lapmode", m === "lap");
   document.body.classList.toggle("pilkmode", m === "pilk");
   document.body.classList.toggle("dyktmode", m === "dykt");
@@ -2494,6 +3222,7 @@ function chooseLevel(m){
   $("pilkbar").hidden = m !== "pilk";
   updateBackgroundSound();
   if (m === "pilk"){ $("mathbar").hidden = true; return; }
+  if (m === "paj"){ $("mathbar").hidden = true; if (changed || !pj || pj.state === "over") startPaj(); return; }
   if (m === "lap"){ $("mathbar").hidden = true; return; }
   if (m === "dykt"){ $("mathbar").hidden = true; if (changed || !dk || dk.done) startDykt(); return; }
   masterName = m === "orto" ? "ortografii" : m === "mat" ? "matematyki" : "literek";
@@ -2513,6 +3242,8 @@ $("settingsBtn").addEventListener("click", () => { settingsVisible = !settingsVi
 $("pilkBtn").addEventListener("click", () => { chooseLevel("pilk"); $("playBtn").dispatchEvent(new Event("start")); });
 setupPitch();
 $("lapBtn").addEventListener("click", () => { chooseLevel("lap"); $("playBtn").dispatchEvent(new Event("start")); });
+$("pajBtn").addEventListener("click", () => { chooseLevel("paj"); $("playBtn").dispatchEvent(new Event("start")); });
+setupPajbar();
 $("dyktBtn").addEventListener("click", () => { chooseLevel("dykt"); $("playBtn").dispatchEvent(new Event("start")); });
 setupDyktbar();
 $("mathBtn").addEventListener("click", () => { chooseLevel("mat"); $("playBtn").dispatchEvent(new Event("start")); });
@@ -2527,6 +3258,7 @@ $("playBtn").addEventListener("start", () => {
   if (mode === "lap"){ startLap(); return; }
   if (mode === "pilk"){ startPilk(); return; }
   if (mode === "dykt") return;
+  if (mode === "paj"){ if (!pjRaf){ pjLast = performance.now(); pjRaf = requestAnimationFrame(pjFrame); } return; }
   setTimeout(() => { locked = false; }, 500);
   schedulePeek();
 });
@@ -2535,6 +3267,7 @@ $("againBtn").addEventListener("click", () => {
   if (mode === "lap"){ startLap(); return; }
   if (mode === "pilk"){ startPilk(); return; }
   if (mode === "dykt"){ startDykt(); return; }
+  if (mode === "paj"){ startPaj(0); return; }
   stars = 0; renderStars();
   startRound();
 });
