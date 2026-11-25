@@ -2542,6 +2542,7 @@ $("musicBtn").addEventListener("click", () => {
    # ziemia/gałąź   L liście   t pień (tło)   - nitka pajęczyny (można na niej stanąć i przyczepić się od spodu)
    ^ kolce   o poziomka   j jagoda   $ moneta   a mrówka   w osa   d kapiąca kropla
    S start   C punkt kontrolny   F meta */
+const PJ_ROOF = new Set(["tunel", "sklep", "dom", "szkola"]), PJ_INDOOR = new Set(["sklep", "dom", "szkola"]);
 const PJ_ROWS = 12, PJ_RUN = 5.6, PJ_JUMP = 14.6, PJ_GRAV = 38, PJ_ZIP = 15, PJ_REACH = 8;
 const PJ_CHUNKS = {
   M0:`..............|..............|..............|..............|..............|..............|..............|.......o.o....|..............|..S...........|##############|##############`,
@@ -2591,6 +2592,47 @@ const PJ_CHUNKS = {
   N4:`......................|......................|......................|......................|......................|......o.......o.......|.....---.....---......|.........o............|..---..---..---..---..|C.....................|##....................|##....................`,
   N5:`........................|........................|..----------------------|...o..d..$..d..o..d.....|........................|........................|........w.......w.......|........................|---.....................|........................|......................##|......................##`,
   N6:`............|............|............|............|............|............|......$.....|............|............|.......F....|############|############`,
+  F1:`................|LLLLL......LLLLL|LLLLL......LLLLL|..t..........t..|..t..........t..|..t......o...t..|..t.....###..t..|..t.o........t..|..t###......jt..|..t........###..|################|################`,
+  F2:`................|................|................|.....LLLLL......|....LLLLLLL.....|....o..t.$......|.......t....j...|.......t..w.....|.......t........|.......t...o....|################|################`,
+  F3:`......................|......................|......................|......................|..LLLLLLLLLLLLLLLLLL..|..LLLLLLLLLLLLLLLLLL..|..to.o.o.o.o.o.o.o.t..|..t................t..|..t................t..|.Ct................t..|####^^^^^^^^^^^^^^####|######################`,
+  F4:`................|................|....######......|................|....o..$..o.....|................|................|................|................|..b......a......|################|################`,
+  F5:`..................|..................|...LLLLLLLLLLLL...|...LLLLLLLLLLLL...|.....o......o.....|........##........|........##........|........##........|.....j..##..j.....|.C......##........|##################|##################`,
+  F6:`................|................|................|................|................|................|................|..........o.o...|.........#####..|...a............|################|################`,
+  P1:`..................|..................|..................|..................|.......$..........|......###.........|..........o.o.....|.........#####....|..................|...b..............|##################|##################`,
+  P2:`..............|..............|..............|..............|..............|..............|......$.......|....o..o......|..............|..........a...|#####...######|#####~~~######`,
+  P3:`......................|......................|......................|..------------------..|...o..o..$..o..o......|......................|......................|......................|......................|.C....................|###~~~~~~~~~~~~~~~~###|######################`,
+  P4:`....................|....................|....................|....o.o.o...........|....................|....................|....................|....................|....................|..b.................|####~~~~~###########|####################`,
+  P5:`................|................|................|................|................|........$.......|.......###......|................|....###....###..|.C..............|###..........###|###~~~~~~~~~~###`,
+  P6:`..................|..................|..................|........o.o.......|..................|..................|..................|.........b........|....###.###...###.|..................|###............###|###~~~~~~~~~~~~###`,
+  S1:`################|################|################|................|................|................|.....o..........|.........$......|....##..........|....##...##.j...|################|################`,
+  S2:`####################|####################|####################|...o.o.o.o.o.o.o....|....................|....................|....................|....................|....................|.C..................|###~~~~~~~~~~~~~~###|####################`,
+  S3:`################|################|################|................|................|................|..........$.....|................|.....o......j...|...a...a........|################|################`,
+  S4:`################|################|################|................|.........o.$....|........-----...|................|....o.-----.....|................|..-----.........|################|################`,
+  S5:`################|################|################|.......$..$.....|................|.....######.....|................|................|....o......o....|.C......a.......|################|################`,
+  S6:`##################|##################|##################|...o.o.o.o.o......|..................|..................|..................|.......$..........|......###.........|..a.......a....a..|##################|##################`,
+  R1:`................|................|................|................|................|................|.......o....j...|................|.---..---..---..|................|~~~~~~~~~~~~~~~~|~~~~~~~~~~~~~~~~`,
+  R2:`......................|......................|......................|......................|..LLLLLLLLLLLLLLLLLL..|..LLLLLLLLLLLLLLLLLL..|...o.o.o.o.o.o.o.o....|......................|......................|.C....................|####~~~~~~~~~~~~~~####|####~~~~~~~~~~~~~~####`,
+  R3:`................|................|....######......|................|....o..$..o.....|................|................|................|................|..b......a......|################|################`,
+  R4:`......................|......................|......................|......................|......................|......o.......o.......|.....---.....---......|.........o............|..---..---..---..---..|C.....................|##~~~~~~~~~~~~~~~~~~~~|##~~~~~~~~~~~~~~~~~~~~`,
+  R5:`........................|..LLLLLLLLLLLLLLLLLLLLLL|..LLLLLLLLLLLLLLLLLLLLLL|...o..$..o..j..o........|........................|........w.......w.......|........................|........................|........................|........................|###~~~~~~~~~~~~~~~~~~~##|###~~~~~~~~~~~~~~~~~~~##`,
+  D1:`................|................|................|................|................|.........o......|........###.....|....o...........|...###......j...|...........###..|################|################`,
+  D6:`..............|..............|..............|..............|..............|..............|......$.......|....o..o......|..............|..........a...|#####...######|#####^^^######`,
+  D2:`................|................|................|................|................|........$.......|.......###......|................|....###....###..|.C..............|###..........###|###^^^^^^^^^^###`,
+  D3:`......................|......................|......................|......................|..##################..|..##################..|...o.o.o.o.o.o.o.o....|......................|......................|.C....................|####^^^^^^^^^^^^^^####|######################`,
+  D5:`..................|..................|..................|..................|.......$..........|......###.........|..........o.o.....|.........#####....|..................|...b..............|##################|##################`,
+  D4:`..................|..................|...############...|...############...|.....o......o.....|........##........|........##........|........##........|.....j..##..j.....|.C......##........|##################|##################`,
+  H1:`################|################|################|................|................|................|.....o..........|.........$......|....##..........|....##...##.j...|################|################`,
+  H2:`################|################|################|....d.....d.....|................|................|..........$.....|................|.....o......j...|.......a........|################|################`,
+  H3:`################|################|################|................|.........o.$....|........-----...|................|....o.-----.....|................|..-----.........|################|################`,
+  H4:`####################|####################|####################|...o.o.o.o.o.o.o....|....................|....................|....................|....................|....................|.C..................|###~~~~~~~~~~~~~~###|####################`,
+  H5:`################|################|################|................|................|................|..o.o...........|................|................|...a.....b..a...|################|################`,
+  H6:`################|################|################|######..........|######..........|######......o...|..o.............|..........##....|......##..##....|......##..##.j..|################|################`,
+  Z1:`################|################|################|................|................|................|.....o.....o....|................|....###....###..|....#.#....#.#..|################|################`,
+  Z2:`################|################|################|................|.........o.$....|........-----...|................|....o.-----.....|................|..-----.........|################|################`,
+  Z3:`####################|####################|####################|...o.o.o.o.o.o.o....|....................|....................|....................|....................|....................|.C..................|###^^^^^^^^^^^^^^###|####################`,
+  Z4:`################|################|################|.....o......o...|........##......|........##......|........##......|........##......|.C......##......|........##..j...|################|################`,
+  Z5:`##################|##################|##################|...o.o.o.o.o......|..................|..................|..................|.......$..........|......###.........|..a.......a....a..|##################|##################`,
+  Z6:`################|################|################|.......$..$.....|................|.....######.....|................|................|....o......o....|.C......a.......|################|################`,
 };
 const PJ_LEVELS = [
   {name:"Łąka", zone:"laka", chunks:["M0","M1","M2","M3","M4","M5","M6","M7","M8"],
@@ -2605,6 +2647,20 @@ const PJ_LEVELS = [
    tip:"Na mrówki możesz skoczyć z góry. Zajrzyj też do górnych korytarzy!"},
   {name:"Nocna pajęczyna", zone:"siec", chunks:["N0","N1","N2","N3","N4","N5","N6"],
    tip:"Najdłuższa wyprawa – uważaj na krople i osy pod nitkami."},
+  {name:"Las", zone:"las", chunks:["M0","F1","F2","F3","F4","F5","F6","M8"],
+   tip:"W lesie korony drzew są jak sufit – przejdź po nich nad kolcami."},
+  {name:"Plac zabaw", zone:"plac", chunks:["M0","P1","P2","P3","P4","P5","P6","M8"],
+   tip:"Złap się drabinek od spodu i przejdź nad kałużą. Trampoliny wyrzucają wysoko!"},
+  {name:"Sklep", zone:"sklep", chunks:["T0","S1","S2","S3","S4","S5","S6","T7"],
+   tip:"Uważaj na rozlany sok i myszki! Możesz chodzić po suficie i po półkach."},
+  {name:"Rzeka", zone:"rzeka", chunks:["M0","R1","R2","R3","R4","R5","M8"],
+   tip:"Skacz po kłodach i nie wpadnij do wody! Nad rzeką przejdź pod gałęziami."},
+  {name:"Powalone drzewa", zone:"drzewa", chunks:["M0","D1","D6","D2","D3","D5","D4","M8"],
+   tip:"Wdrapuj się po pniach. Pod wielkim pniem przejdziesz do góry nogami."},
+  {name:"Dom", zone:"dom", chunks:["T0","H1","H3","H2","H4","H6","H5","T7"],
+   tip:"Z kranu kapie woda, a po podłodze biegają myszki – uważaj!"},
+  {name:"Szkoła", zone:"szkola", chunks:["T0","Z1","Z2","Z3","Z4","Z5","Z6","T7"],
+   tip:"Uważaj na pinezki! Nad tablicą przejdziesz po suficie."},
 ];
 let pj = null, pjRaf = null, pjLast = 0, pjLvl = store.get("pajLvl", 0);
 const pjKeys = {L:false, R:false, J:false, D:false, Z:false}, pjPress = {J:false, D:false, Z:false};
@@ -2631,7 +2687,7 @@ function pjParse(i){
 }
 function pjTile(c, r){
   if (c < 0 || c >= pj.W) return "#";
-  if (r < 0) return pj.zone === "tunel" ? "#" : ".";
+  if (r < 0) return PJ_ROOF.has(pj.zone) ? "#" : ".";
   if (r >= PJ_ROWS) return ".";
   return pj.grid[r][c];
 }
@@ -2774,7 +2830,7 @@ function pjZip(){
   const s = pj.sp; if (s.zip || s.onCeil) return;
   const cx = s.x + s.w/2, c = Math.floor(cx), top = Math.floor(s.y);
   for (let r = top - 1; r >= top - PJ_REACH; r--){
-    if (r < 0 && pj.zone !== "tunel") break;
+    if (r < 0 && !PJ_ROOF.has(pj.zone)) break;
     if (pjCeil(c, r)){
       s.zip = {toY:r + 1, ax:cx}; s.vx = 0; s.vy = 0; s.onGround = false;
       pjSfx("zip"); return;
@@ -2858,7 +2914,11 @@ function pjUpdate(dt){
   pjGrow();
   // kolce i przepaść
   const c0 = Math.floor(s.x), c1 = Math.floor(s.x + s.w - 0.001), r0 = Math.floor(s.y), r1 = Math.floor(s.y + s.h - 0.001);
-  for (let c=c0; c<=c1; c++) for (let r=r0; r<=r1; r++) if (pjTile(c, r) === "^" && s.y + s.h > r + 0.5) pjDie();
+  for (let c=c0; c<=c1; c++) for (let r=r0; r<=r1; r++){
+    const tt = pjTile(c, r);
+    if (tt === "^" && s.y + s.h > r + 0.5) pjDie();
+    else if (tt === "~" && s.y + s.h > r + 0.35){ pjBurst(s.x + s.w/2, r + 0.3, "#7EC3F5", 12); pjDie(); }
+  }
   if (s.y > PJ_ROWS + 0.5) pjDie();
   if (pj.state !== "play") return;
 
@@ -2965,13 +3025,14 @@ function pjDraw(){
   pj.T = T; pj.vw = w/T;
   c.setTransform(dpr, 0, 0, dpr, 0, 0);
   const cam = Math.round(pj.cam*T)/T, t = pj.t;
-  pjBackground(c, w, h, T, cam, t);
+  pjBackground(c, w, h, T, cam, t, oy);
   c.save(); c.translate(-cam*T, oy);
   const rTop = -Math.ceil(oy/T);
   const cA = Math.max(0, Math.floor(cam) - 1), cB = Math.min(pj.W - 1, Math.ceil(cam + pj.vw) + 1);
   for (let col=cA; col<=cB; col++) for (let r=0; r<PJ_ROWS; r++) if (pj.grid[r][col] === "t") pjTileDraw(c, "t", col, r, T);
   for (let col=cA; col<=cB; col++) for (let r=rTop; r<PJ_ROWS + Math.ceil(below/T); r++){
-    const k = r < PJ_ROWS ? pjTile(col, r) : ("#^".includes(pj.grid[PJ_ROWS - 1][col]) ? "#" : ".");
+    const last = pj.grid[PJ_ROWS - 1][col];
+    const k = r < PJ_ROWS ? pjTile(col, r) : last === "~" ? "~" : "#^".includes(last) ? "#" : ".";
     if (k !== "." && k !== "t") pjTileDraw(c, k, col, r, T);
   }
   for (const cp of pj.cps) pjDrawCp(c, cp, T, t);
@@ -2994,8 +3055,9 @@ function pjDraw(){
   if (pj.zone === "tunel") pjDarkness(c, w, h, T, cam, t, oy);
   pjOverlayText(c, w, h, T, t, font);
 }
-function pjBackground(c, w, h, T, cam, t){
+function pjBackground(c, w, h, T, cam, t, oy){
   const z = pj.zone;
+  if (pjBackground2(c, w, h, T, cam, t, oy)) return;
   if (z === "laka"){
     let g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#8FD0FF"); g.addColorStop(1, "#E4F5FF");
     c.fillStyle = g; c.fillRect(0, 0, w, h);
@@ -3043,9 +3105,293 @@ function pjBackground(c, w, h, T, cam, t){
     }
   }
 }
+/* --- nowe światy: las, plac zabaw, sklep, rzeka, powalone drzewa, dom, szkoła --- */
+function pjSkyBg(c, w, h, T, cam, top, bottom){
+  const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, top); g.addColorStop(1, bottom);
+  c.fillStyle = g; c.fillRect(0, 0, w, h);
+  c.fillStyle = "rgba(255,224,122,.35)"; c.beginPath(); c.arc(w - T*1.8, T*1.6, T*1.4, 0, Math.PI*2); c.fill();
+  c.fillStyle = "#FFE07A"; c.beginPath(); c.arc(w - T*1.8, T*1.6, T*0.95, 0, Math.PI*2); c.fill();
+  const pc = cam*0.25;
+  c.fillStyle = "rgba(255,255,255,.9)";
+  for (let i = Math.floor(pc/9) - 1; i < (pc + pj.vw)/9 + 1; i++){
+    const x = (i*9 + pjHash(i, 1)*4 - pc)*T, y = (0.8 + pjHash(i, 2)*2.4)*T, s = T*(0.5 + pjHash(i, 3)*0.3);
+    c.beginPath(); c.ellipse(x, y, s*1.8, s*0.8, 0, 0, Math.PI*2); c.ellipse(x - s*0.8, y + s*0.1, s, s*0.6, 0, 0, Math.PI*2); c.ellipse(x + s*0.7, y - s*0.35, s*1.1, s*0.8, 0, 0, Math.PI*2); c.fill();
+  }
+}
+function pjTreesBg(c, h, T, cam, par, step, col, oy){
+  const pc = cam*par;
+  for (let i = Math.floor(pc/step) - 1; i < (pc + pj.vw)/step + 1; i++){
+    const x = (i*step + pjHash(i, 50)*step*0.5 - pc)*T, top = oy + (3 + pjHash(i, 51)*2)*T, R = T*(1.1 + pjHash(i, 52)*0.6);
+    c.fillStyle = col; c.fillRect(x - T*0.15, top, T*0.3, oy + 10*T - top);
+    c.beginPath(); c.arc(x, top, R, 0, Math.PI*2); c.arc(x - R*0.6, top + R*0.4, R*0.7, 0, Math.PI*2); c.arc(x + R*0.6, top + R*0.4, R*0.7, 0, Math.PI*2); c.fill();
+  }
+}
+function pjBackground2(c, w, h, T, cam, t, oy){
+  const z = pj.zone;
+  if (z === "las"){
+    const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#2F5D3A"); g.addColorStop(1, "#9CC98B");
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+    c.fillStyle = "rgba(255,250,210,.13)";
+    for (let i=0; i<4; i++){ const x = ((i*7 + 3 - cam*0.15) % 28 + 28) % 28*T - T*4; c.beginPath(); c.moveTo(x, 0); c.lineTo(x + T*1.6, 0); c.lineTo(x + T*5, h); c.lineTo(x + T*3, h); c.fill(); }
+    [[0.3, "rgba(30,48,30,.35)", 3.1], [0.55, "rgba(52,36,24,.55)", 4.3]].forEach(([par, col, step]) => {
+      const pc = cam*par; c.fillStyle = col;
+      for (let i = Math.floor(pc/step) - 1; i < (pc + pj.vw)/step + 1; i++){ const x = (i*step + pjHash(i, 60 + step)*2 - pc)*T, ww = T*(0.35 + pjHash(i, 61)*0.5); c.fillRect(x, 0, ww, h); }
+    });
+    c.fillStyle = "rgba(26,66,36,.6)";
+    for (let x = -T; x < w + T; x += T*0.9){ const wx = x/T + cam*0.55; c.beginPath(); c.arc(x, T*(0.3 + Math.sin(wx*1.7)*0.25), T*0.9, 0, Math.PI*2); c.fill(); }
+    return true;
+  }
+  if (z === "drzewa"){
+    pjSkyBg(c, w, h, T, cam, "#A8D3EE", "#E7F3E2");
+    pjTreesBg(c, h, T, cam, 0.35, 5, "#9CC596", oy);
+    pjTreesBg(c, h, T, cam, 0.55, 7, "#7DAF78", oy);
+    return true;
+  }
+  if (z === "rzeka"){
+    pjSkyBg(c, w, h, T, cam, "#8FD0FF", "#E4F5FF");
+    pjTreesBg(c, h, T, cam, 0.4, 4, "#8DBF86", oy);
+    const pc = cam*0.75; c.strokeStyle = "#6FA24E"; c.lineWidth = Math.max(1.5, T*0.06);
+    for (let i = Math.floor(pc*2) - 2; i < (pc + pj.vw)*2 + 2; i++){
+      const x = (i/2 + pjHash(i, 70)*0.4 - pc)*T, hh = T*(0.8 + pjHash(i, 71)*1.2), sw = Math.sin(t*1.5 + i)*T*0.08;
+      c.beginPath(); c.moveTo(x, oy + 10*T); c.quadraticCurveTo(x + sw, oy + 10*T - hh*0.6, x + sw*2, oy + 10*T - hh); c.stroke();
+      if (pjHash(i, 72) > 0.6){ c.fillStyle = "#7A5236"; c.fillRect(x + sw*2 - T*0.06, oy + 10*T - hh, T*0.12, T*0.35); }
+    }
+    return true;
+  }
+  if (z === "plac"){
+    pjSkyBg(c, w, h, T, cam, "#8FD0FF", "#E4F5FF");
+    const pc = cam*0.7, gy = oy + 10*T;
+    for (let i = Math.floor(pc/16) - 1; i < (pc + pj.vw)/16 + 1; i++){
+      const x0 = (i*16 + 2 - pc)*T;
+      c.strokeStyle = "rgba(232,86,74,.55)"; c.lineWidth = T*0.14; c.lineCap = "round";
+      c.beginPath(); c.moveTo(x0, gy); c.lineTo(x0 + T, gy - 4*T); c.lineTo(x0 + 2*T, gy);
+      c.moveTo(x0 + 4*T, gy); c.lineTo(x0 + 5*T, gy - 4*T); c.lineTo(x0 + 6*T, gy); c.moveTo(x0 + T, gy - 4*T); c.lineTo(x0 + 5*T, gy - 4*T); c.stroke();
+      c.strokeStyle = "rgba(90,90,100,.45)"; c.lineWidth = Math.max(1, T*0.04);
+      [2.3, 3.7].forEach(dx => { const sw = Math.sin(t*1.6 + dx)*T*0.25; c.beginPath(); c.moveTo(x0 + dx*T - T*0.25, gy - 4*T); c.lineTo(x0 + dx*T - T*0.25 + sw, gy - 1.4*T); c.moveTo(x0 + dx*T + T*0.25, gy - 4*T); c.lineTo(x0 + dx*T + T*0.25 + sw, gy - 1.4*T); c.stroke();
+        c.fillStyle = "rgba(59,134,214,.6)"; c.fillRect(x0 + dx*T - T*0.32 + sw, gy - 1.45*T, T*0.64, T*0.14); });
+      const sx = x0 + 9*T;
+      c.strokeStyle = "rgba(59,134,214,.5)"; c.lineWidth = T*0.12;
+      c.beginPath(); c.moveTo(sx, gy); c.lineTo(sx, gy - 3.5*T); c.moveTo(sx + 0.8*T, gy); c.lineTo(sx + 0.8*T, gy - 3.5*T); c.stroke();
+      c.lineWidth = T*0.05; c.beginPath(); for (let k=1; k<6; k++){ c.moveTo(sx, gy - k*0.6*T); c.lineTo(sx + 0.8*T, gy - k*0.6*T); } c.stroke();
+      c.strokeStyle = "rgba(245,197,66,.7)"; c.lineWidth = T*0.3; c.beginPath(); c.moveTo(sx + 0.8*T, gy - 3.4*T); c.quadraticCurveTo(sx + 2.6*T, gy - 2.6*T, sx + 3.6*T, gy - 0.2*T); c.stroke();
+    }
+    const pf = cam*0.85; c.fillStyle = "rgba(255,255,255,.55)";
+    for (let i = Math.floor(pf*2) - 2; i < (pf + pj.vw)*2 + 2; i++){ const x = (i/2 - pf)*T; c.fillRect(x, gy - T*1.1, T*0.22, T*1.1); }
+    c.fillRect(0, gy - T*0.8, w, T*0.1);
+    return true;
+  }
+  if (z === "sklep"){
+    c.fillStyle = "#F5EEDD"; c.fillRect(0, 0, w, h);
+    const pc = cam*0.6, cols = ["#E8564A", "#F5C542", "#3B86D6", "#3FA56A", "#9F67C2", "#F28C28", "#FFFFFF"];
+    for (let k=0; k<3; k++){
+      const sy = oy + (5.2 + k*2)*T;
+      c.fillStyle = "#D8C3A0"; c.fillRect(0, sy, w, T*0.14);
+      for (let i = Math.floor(pc*2) - 2; i < (pc + pj.vw)*2 + 2; i++){
+        if (pjHash(i, 80 + k) < 0.15) continue;
+        const x = (i/2 - pc)*T, hh = T*(0.5 + pjHash(i, 90 + k)*0.9);
+        c.fillStyle = cols[Math.floor(pjHash(i, 100 + k)*cols.length)]; c.globalAlpha = 0.55;
+        c.fillRect(x + T*0.04, sy - hh, T*0.42, hh);
+        c.fillStyle = "rgba(255,255,255,.7)"; c.fillRect(x + T*0.1, sy - hh*0.6, T*0.3, T*0.12);
+        c.globalAlpha = 1;
+      }
+    }
+    return true;
+  }
+  if (z === "dom"){
+    c.fillStyle = "#F6E6CC"; c.fillRect(0, 0, w, h);
+    const pc = cam*0.5; c.fillStyle = "#EFD8B5";
+    for (let i = Math.floor(pc) - 1; i < pc + pj.vw + 1; i++) c.fillRect((i - pc)*T, 0, T*0.35, h);
+    for (let i = Math.floor(pc/12) - 1; i < (pc + pj.vw)/12 + 1; i++){
+      const wx = (i*12 + 2 - pc)*T, wy = oy + 3.8*T;
+      c.fillStyle = "#FFFFFF"; c.fillRect(wx - T*0.15, wy - T*0.15, T*2.9, T*3.1);
+      c.fillStyle = "#BFE3FA"; c.fillRect(wx, wy, T*2.6, T*2.8);
+      c.fillStyle = "#86C98D"; c.fillRect(wx, wy + T*2.1, T*2.6, T*0.7);
+      c.fillStyle = "#FFFFFF"; c.fillRect(wx + T*1.25, wy, T*0.1, T*2.8); c.fillRect(wx, wy + T*1.35, T*2.6, T*0.1);
+      c.fillStyle = "#E8669A"; c.fillRect(wx - T*0.5, wy - T*0.3, T*0.45, T*3.6); c.fillRect(wx + T*2.65, wy - T*0.3, T*0.45, T*3.6);
+      const px = (i*12 + 8 - pc)*T, py = oy + 4.4*T;
+      c.fillStyle = "#8B5A35"; c.fillRect(px, py, T*1.8, T*1.4);
+      c.fillStyle = "#CFEAF8"; c.fillRect(px + T*0.15, py + T*0.15, T*1.5, T*1.1);
+      c.fillStyle = "#3FA56A"; c.beginPath(); c.moveTo(px + T*0.15, py + T*1.25); c.lineTo(px + T*0.8, py + T*0.55); c.lineTo(px + T*1.65, py + T*1.25); c.fill();
+      c.fillStyle = "#F5C542"; c.beginPath(); c.arc(px + T*1.3, py + T*0.45, T*0.15, 0, Math.PI*2); c.fill();
+    }
+    return true;
+  }
+  if (z === "szkola"){
+    c.fillStyle = "#EAF2E3"; c.fillRect(0, 0, w, h);
+    c.fillStyle = "#CFE2C5"; c.fillRect(0, oy + 7.6*T, w, h);
+    c.fillStyle = "#B7D1AA"; c.fillRect(0, oy + 7.6*T, w, T*0.1);
+    const pc = cam*0.6, font = getComputedStyle(document.body).fontFamily;
+    const texts = ["A B C", "2 + 2 = 4", "ó  rz  ch", "Ala ma kota"];
+    for (let i = Math.floor(pc/16) - 1; i < (pc + pj.vw)/16 + 1; i++){
+      const bx = (i*16 + 3 - pc)*T, by = oy + 3.6*T;
+      c.fillStyle = "#A0683C"; c.fillRect(bx - T*0.15, by - T*0.15, T*5.3, T*3);
+      c.fillStyle = "#2F5E46"; c.fillRect(bx, by, T*5, T*2.7);
+      c.fillStyle = "rgba(255,255,255,.85)"; c.font = `700 ${Math.round(T*0.6)}px ${font}`; c.textAlign = "center"; c.textBaseline = "middle";
+      c.fillText(texts[((i % 4) + 4) % 4], bx + T*2.5, by + T*1.35);
+      const cx = (i*16 + 12 - pc)*T, cy = oy + 4.6*T;
+      c.fillStyle = "#FFFFFF"; c.strokeStyle = "#24324A"; c.lineWidth = Math.max(2, T*0.07);
+      c.beginPath(); c.arc(cx, cy, T*0.7, 0, Math.PI*2); c.fill(); c.stroke();
+      c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx, cy - T*0.5); c.moveTo(cx, cy); c.lineTo(cx + T*0.35, cy + T*0.1); c.stroke();
+    }
+    return true;
+  }
+  return false;
+}
+function pjTileDraw2(c, k, col, r, T, x, y, z, hs, open){
+  if (k === "~"){
+    const top = pjTile(col, r - 1) === "~" ? y : y + T*(0.3 + Math.sin(pj.t*3 + col*1.3)*0.04);
+    const g = c.createLinearGradient(0, top, 0, y + T); g.addColorStop(0, "#5DB2EC"); g.addColorStop(1, "#2F75BE");
+    c.fillStyle = g; c.fillRect(x, top, T + 0.6, y + T - top + 0.6);
+    if (top > y){ c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = Math.max(1.5, T*0.05); c.beginPath(); c.moveTo(x, top); c.quadraticCurveTo(x + T/2, top + Math.sin(pj.t*4 + col)*T*0.06, x + T, top); c.stroke(); }
+    return true;
+  }
+  if (k === "-" && z !== "siec"){
+    if (z === "las" || z === "drzewa"){
+      c.strokeStyle = "#6E4A2E"; c.lineWidth = T*0.16; c.lineCap = "round";
+      c.beginPath(); c.moveTo(x - T*0.02, y + T*0.15); c.lineTo(x + T*1.02, y + T*0.15); c.stroke();
+      if (hs < 0.5){ c.fillStyle = "#4FA85B"; c.beginPath(); c.ellipse(x + T*(0.3 + hs), y + T*0.32, T*0.14, T*0.07, 0.6, 0, Math.PI*2); c.fill(); }
+    } else if (z === "rzeka"){
+      const L = pjTile(col - 1, r) !== "-", R = pjTile(col + 1, r) !== "-";
+      c.fillStyle = "#8B5A35"; c.beginPath();
+      if (c.roundRect) c.roundRect(x + (L ? T*0.05 : 0), y, T - (L ? T*0.05 : 0) - (R ? T*0.05 : 0) + 0.6, T*0.34, [L ? T*0.17 : 0, R ? T*0.17 : 0, R ? T*0.17 : 0, L ? T*0.17 : 0]); else c.rect(x, y, T + 0.6, T*0.34);
+      c.fill();
+      c.fillStyle = "#6E4429"; c.fillRect(x, y + T*0.14, T + 0.6, T*0.04);
+      if (L || R){ c.fillStyle = "#D9B27C"; c.beginPath(); c.ellipse(L ? x + T*0.12 : x + T*0.88, y + T*0.17, T*0.08, T*0.15, 0, 0, Math.PI*2); c.fill(); }
+    } else if (z === "plac"){
+      c.strokeStyle = "#E8564A"; c.lineWidth = T*0.12; c.lineCap = "butt";
+      c.beginPath(); c.moveTo(x, y + T*0.12); c.lineTo(x + T + 0.6, y + T*0.12); c.stroke();
+      c.strokeStyle = "#B8433A"; c.lineWidth = T*0.06; c.beginPath(); c.moveTo(x + T/2, y + T*0.04); c.lineTo(x + T/2, y + T*0.2); c.stroke();
+    } else {
+      c.fillStyle = z === "szkola" ? "#B5835A" : z === "sklep" ? "#C9CDD2" : "#C8945A";
+      c.fillRect(x, y, T + 0.6, T*0.18);
+      c.fillStyle = z === "sklep" ? "#9AA2AB" : "#8B6A4A";
+      if (pjHash(col, 5) < 0.5){ c.beginPath(); c.moveTo(x + T*0.35, y + T*0.18); c.lineTo(x + T*0.65, y + T*0.18); c.lineTo(x + T*0.35, y + T*0.45); c.fill(); }
+    }
+    return true;
+  }
+  if (k === "b" && (z === "plac" || PJ_INDOOR.has(z))){
+    const a = pj.t - (pj.bounce[col + "," + r] ?? -9), sq = a < 0.25 ? Math.sin(a/0.25*Math.PI) : 0;
+    c.fillStyle = "#6B7280"; c.fillRect(x + T*0.12, y + T*0.55, T*0.1, T*0.45 + 0.6); c.fillRect(x + T*0.78, y + T*0.55, T*0.1, T*0.45 + 0.6);
+    c.fillStyle = "#3B86D6"; c.fillRect(x + T*0.04, y + T*0.48, T*0.92, T*0.14);
+    c.fillStyle = "#24324A"; c.beginPath(); c.moveTo(x + T*0.08, y + T*0.5); c.quadraticCurveTo(x + T/2, y + T*(0.5 + sq*0.3), x + T*0.92, y + T*0.5); c.lineTo(x + T*0.92, y + T*0.46); c.lineTo(x + T*0.08, y + T*0.46); c.fill();
+    return true;
+  }
+  if (k === "^" && z === "szkola"){
+    const heads = ["#E8564A", "#3B86D6", "#F5C542"];
+    for (let i=0; i<3; i++){
+      const cx = x + (i + 0.5)*T/3;
+      c.fillStyle = "#B8BEC8"; c.beginPath(); c.moveTo(cx - T*0.03, y + T*0.8); c.lineTo(cx, y + T*0.45); c.lineTo(cx + T*0.03, y + T*0.8); c.fill();
+      c.fillStyle = heads[i]; c.beginPath(); c.ellipse(cx, y + T*0.86, T*0.14, T*0.09, 0, 0, Math.PI*2); c.fill();
+    }
+    return true;
+  }
+  if (k !== "#" || !["las", "drzewa", "rzeka", "plac", "sklep", "dom", "szkola"].includes(z)) return false;
+  const fill = (col0) => { c.fillStyle = col0; c.fillRect(x, y, T + 0.6, T + 0.6); };
+  const grass = (gc) => {
+    if (!open(col, r - 1) || r <= 0) return;
+    c.fillStyle = gc; c.fillRect(x, y, T + 0.6, T*0.24);
+    c.beginPath(); for (let i=0; i<3; i++) c.arc(x + T*(0.17 + i*0.33), y + T*0.22, T*0.13, 0, Math.PI); c.fill();
+  };
+  if (z === "las" || z === "rzeka" || (z === "drzewa" && r >= 10)){
+    fill(z === "las" ? "#5A4030" : "#7A5A3C");
+    if (hs < 0.6){ c.fillStyle = z === "las" ? "#4A3426" : "#684C32"; c.beginPath(); c.ellipse(x + T*(0.25 + hs*0.6), y + T*(0.4 + pjHash(r, col)*0.35), T*0.14, T*0.09, 0, 0, Math.PI*2); c.fill(); }
+    grass(z === "las" ? "#3E8E45" : "#5CB85F");
+    if (z === "las" && open(col, r - 1) && hs > 0.78){
+      const mx = x + T*(0.3 + pjHash(col, 97)*0.4);
+      c.fillStyle = "#F4E9D8"; c.fillRect(mx - T*0.05, y - T*0.2, T*0.1, T*0.2);
+      c.fillStyle = hs > 0.9 ? "#E23B3B" : "#B5835A"; c.beginPath(); c.ellipse(mx, y - T*0.2, T*0.16, T*0.1, 0, Math.PI, 0); c.fill();
+    }
+    return true;
+  }
+  if (z === "drzewa"){
+    fill("#7A5236");
+    c.strokeStyle = "#5E3E27"; c.lineWidth = Math.max(1, T*0.05);
+    c.beginPath(); c.moveTo(x, y + T*0.33); c.lineTo(x + T, y + T*0.33); c.moveTo(x, y + T*0.68); c.lineTo(x + T, y + T*0.68); c.stroke();
+    if (open(col, r - 1)){ c.fillStyle = "#6E9E4A"; c.fillRect(x, y, T + 0.6, T*0.12); }
+    [[-1, 0.1], [1, 0.9]].forEach(([d, fx]) => {
+      if (!open(col + d, r)) return;
+      c.fillStyle = "#D9B27C"; c.beginPath(); c.ellipse(x + T*fx, y + T/2, T*0.14, T*0.46, 0, 0, Math.PI*2); c.fill();
+      c.strokeStyle = "#B08452"; c.lineWidth = Math.max(1, T*0.03); c.beginPath(); c.ellipse(x + T*fx, y + T/2, T*0.07, T*0.25, 0, 0, Math.PI*2); c.stroke();
+    });
+    return true;
+  }
+  if (z === "plac"){
+    if (r >= 10){
+      fill("#E9D59B");
+      c.fillStyle = "#D8C185"; for (let i=0; i<3; i++){ c.beginPath(); c.arc(x + T*pjHash(col + i, r), y + T*pjHash(r + i, col + 7), T*0.04, 0, Math.PI*2); c.fill(); }
+    } else {
+      const cols = ["#E8564A", "#F5C542", "#3B86D6", "#3FA56A"];
+      fill(cols[Math.floor(pjHash(Math.floor(col/2), r)*4)]);
+      c.strokeStyle = "rgba(255,255,255,.45)"; c.lineWidth = Math.max(1.5, T*0.06); c.strokeRect(x + T*0.08, y + T*0.08, T*0.84, T*0.84);
+    }
+    return true;
+  }
+  // wnętrza: sufit, podłoga i meble
+  if (r <= 2){
+    fill(z === "sklep" ? "#E3E3E3" : "#F7F3EC");
+    if (open(col, r + 1)){
+      c.fillStyle = z === "sklep" ? "#C9C9C9" : "#E2D9C8"; c.fillRect(x, y + T*0.86, T + 0.6, T*0.14);
+      if (col % 6 === 3){ c.strokeStyle = "#8A8A8A"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x + T/2, y + T); c.lineTo(x + T/2, y + T*1.3); c.stroke();
+        c.fillStyle = "#FFE48A"; c.beginPath(); c.ellipse(x + T/2, y + T*1.38, T*0.3, T*0.14, 0, Math.PI, 0); c.fill(); }
+    }
+    return true;
+  }
+  if (r >= 10){
+    if (z === "sklep") fill((col + r) % 2 ? "#EDEDED" : "#CFCFCF");
+    else if (z === "dom"){ fill("#B9824F"); c.fillStyle = "#A06C3F"; c.fillRect(x, y + T*0.48, T + 0.6, T*0.04); c.fillRect(x + T*((col % 3)/3), y, T*0.04, T*0.5); c.fillRect(x + T*(((col + 1) % 3)/3), y + T*0.5, T*0.04, T*0.5); }
+    else { fill("#C9B58A"); c.fillStyle = "#B8A478"; c.fillRect(x + T*hs*0.8, y + T*pjHash(r, col)*0.8, T*0.08, T*0.08); }
+    if (open(col, r - 1)){ c.fillStyle = "rgba(0,0,0,.12)"; c.fillRect(x, y, T + 0.6, T*0.06); }
+    return true;
+  }
+  if (z === "sklep"){
+    fill("#C99A5B");
+    c.fillStyle = "#E2C08A"; c.fillRect(x + T*0.42, y, T*0.16, T + 0.6);
+    c.strokeStyle = "#A97C42"; c.lineWidth = Math.max(1, T*0.04); c.strokeRect(x + 1, y + 1, T - 2, T - 2);
+  } else if (z === "dom"){
+    fill("#8B5A35");
+    if (open(col, r - 1)){ c.fillStyle = "#A8703F"; c.fillRect(x, y, T + 0.6, T*0.22); }
+    c.fillStyle = "#74492A"; c.fillRect(x, y + T*0.62, T + 0.6, T*0.04);
+  } else {
+    fill("#9AA4AE");
+    if (open(col, r - 1)){ c.fillStyle = "#A0683C"; c.fillRect(x - 1, y, T + 2.6, T*0.26); }
+    c.fillStyle = "#87919B"; c.fillRect(x + T*0.1, y + T*0.4, T*0.8, T*0.06);
+  }
+  return true;
+}
+function pjDrawIndoorEnemy(c, e, T, t){
+  if (e.k === "a"){
+    let alpha = 1, flat = 1;
+    if (e.dead){ const a = pj.t - e.dead; if (a > 0.6) return; alpha = 1 - a/0.6; flat = 0.35; }
+    c.save(); c.globalAlpha = alpha; c.translate(e.x*T, e.y*T); c.scale(e.dir, flat);
+    const st = Math.sin(e.walk*18)*T*0.04;
+    c.strokeStyle = "#E8A0B4"; c.lineWidth = Math.max(1.5, T*0.04); c.lineCap = "round";
+    c.beginPath(); c.moveTo(-T*0.3, -T*0.12); c.quadraticCurveTo(-T*0.55, -T*0.1 + st, -T*0.6, -T*0.35); c.stroke();
+    c.fillStyle = "#7E8290";
+    c.fillRect(-T*0.18 + st, -T*0.06, T*0.08, T*0.06); c.fillRect(T*0.1 - st, -T*0.06, T*0.08, T*0.06);
+    c.beginPath(); c.ellipse(-T*0.04, -T*0.2, T*0.28, T*0.17, 0, 0, Math.PI*2); c.fill();
+    c.beginPath(); c.ellipse(T*0.24, -T*0.22, T*0.15, T*0.12, 0, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#9A9EAB"; c.beginPath(); c.arc(T*0.16, -T*0.38, T*0.1, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#F2B6C8"; c.beginPath(); c.arc(T*0.16, -T*0.38, T*0.06, 0, Math.PI*2); c.fill();
+    c.beginPath(); c.arc(T*0.39, -T*0.21, T*0.035, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#111111"; c.beginPath(); c.arc(T*0.27, -T*0.25, T*0.03, 0, Math.PI*2); c.fill();
+    c.restore();
+  } else {
+    c.save(); c.translate(e.x*T, e.y*T); c.scale(e.vx < 0 ? -1 : 1, 1);
+    const fl = Math.abs(Math.sin(t*45));
+    c.fillStyle = "rgba(220,232,255,.8)";
+    c.beginPath(); c.ellipse(-T*0.06, -T*0.17, T*0.15, T*0.07*fl + T*0.02, -0.4, 0, Math.PI*2); c.fill();
+    c.beginPath(); c.ellipse(T*0.05, -T*0.18, T*0.13, T*0.06*fl + T*0.02, -0.2, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#33363D"; c.beginPath(); c.ellipse(0, 0, T*0.22, T*0.14, 0, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#4A4E57"; c.fillRect(-T*0.12, -T*0.03, T*0.04, T*0.13); c.fillRect(-T*0.02, -T*0.04, T*0.04, T*0.14);
+    c.fillStyle = "#A3292F"; c.beginPath(); c.arc(T*0.2, -T*0.03, T*0.08, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#FFFFFF"; c.beginPath(); c.arc(T*0.23, -T*0.06, T*0.025, 0, Math.PI*2); c.fill();
+    c.restore();
+  }
+}
 function pjTileDraw(c, k, col, r, T){
   const x = col*T, y = r*T, z = pj.zone, hs = pjHash(col, r);
   const open = (cc, rr) => rr >= PJ_ROWS ? !"#^".includes((pj.grid[PJ_ROWS - 1][cc]) || ".") : !pjSolid(cc, rr) && pjTile(cc, rr) !== "L";
+  if (pjTileDraw2(c, k, col, r, T, x, y, z, hs, open)) return;
   if (k === "#"){
     c.fillStyle = z === "laka" ? "#9A6A43" : z === "tunel" ? "#3F2B1E" : "#7A5236";
     c.fillRect(x, y, T + 0.6, T + 0.6);
@@ -3149,6 +3495,7 @@ function pjDrawItem(c, k, x, y, T, t){
   }
 }
 function pjDrawEnemy(c, e, T, t){
+  if (PJ_INDOOR.has(pj.zone)){ pjDrawIndoorEnemy(c, e, T, t); return; }
   if (e.k === "a"){
     let alpha = 1, flat = 1;
     if (e.dead){ const a = pj.t - e.dead; if (a > 0.6) return; alpha = 1 - a/0.6; flat = 0.35; }
