@@ -229,6 +229,42 @@ body.lapmode .lapHud{display:flex}
 .play:active{transform:translateY(6px); box-shadow:inset 0 0 0 5px rgba(255,255,255,.3), 0 2px 0 #B9432A}
 .note{font-size:15px !important}
 
+/* ---------- Labirynt 3D ---------- */
+.level.maze{background:#8A4A2E; box-shadow:inset 0 0 0 5px rgba(255,255,255,.3), 0 7px 0 #55291A}
+.mzc{display:none; position:absolute; inset:0; width:100%; height:100%; border-radius:24px; touch-action:none; background:#222; cursor:grab; box-shadow:0 10px 0 rgba(36,50,74,.12)}
+.mazeHud{display:none; gap:6px; flex-wrap:wrap; font-variant-numeric:tabular-nums}
+.mazeHud .pill{cursor:default}
+body.mazemode .card, body.mazemode .blocks, body.mazemode .stars{display:none}
+body.mazemode .mzc{display:block}
+body.mazemode .mazeHud{display:flex}
+body.mazemode .stage{place-items:stretch; position:relative; min-width:0}
+body.mazemode .app{grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) 0px}
+body.mazemode{touch-action:none; overscroll-behavior:none}
+body.mazemode #pawBadge{display:none}
+.mzpad{display:none; position:absolute; left:10px; right:10px; bottom:10px; justify-content:space-between; pointer-events:none}
+body.mazemode .mzpad{display:flex}
+.mzpad div{display:flex; gap:10px; pointer-events:auto}
+.mzpad button{width:clamp(54px,13vw,72px); height:clamp(54px,13vw,72px); border-radius:50%; border:0; padding:0; background:rgba(255,255,255,.6); color:#24324A;
+  font-size:clamp(22px,6vw,32px); line-height:1; box-shadow:0 4px 0 rgba(36,50,74,.25); touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; cursor:pointer}
+.mzpad button.on{background:rgba(255,255,255,.95); transform:translateY(3px); box-shadow:0 1px 0 rgba(36,50,74,.25)}
+@media (hover:hover) and (pointer:fine){ .mzpad button{opacity:.6} }
+@media (max-width:600px), (max-height:520px){
+  body.mazemode .app{gap:8px; padding-block:8px 10px; padding-inline:10px}
+  body.mazemode .top{gap:6px}
+  body.mazemode .top .pill{font-size:15px; padding:4px 11px}
+  body.mazemode .mzhint{display:none}
+  body.mazemode .right, body.mazemode .mazeHud{gap:6px}
+}
+@media (max-height:520px){
+  body.mazemode .app{max-width:none}
+  body.mazemode .top{flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto}
+  body.mazemode .top > *{flex-shrink:0}
+  body.mazemode #mazebar{flex-basis:auto; flex-wrap:nowrap; order:3; gap:6px}
+  body.mazemode #mazebar .dsel{padding:4px 8px; font-size:15px; width:150px}
+  body.mazemode .mazeHud{order:1} body.mazemode .right{order:2}
+}
+@media (pointer:coarse){ body.mazemode .mzhint{display:none} }
+
 /* ---------- Dyktando ---------- */
 .level.dykt{background:var(--teal); box-shadow:inset 0 0 0 5px rgba(255,255,255,.3), 0 7px 0 #136B68}
 .dtext{
@@ -346,6 +382,14 @@ body.dyktmode .dyktHud{display:flex}
       <span class="pill" title="Jagody">🫐 <span id="pjJ">0</span></span>
       <span class="pill" title="Monety">🪙 <span id="pjC">0</span></span>
     </div>
+    <div class="mazeHud">
+      <span class="pill" id="mzName" title="Poziom">Piwnica</span>
+      <span class="pill" title="Poziomki">🍓 <span id="mzO">0</span></span>
+      <span class="pill" title="Jagody">🫐 <span id="mzJ">0</span></span>
+      <span class="pill" title="Monety">🪙 <span id="mzC">0</span></span>
+      <span class="pill" title="Diamenty">💎 <span id="mzD">0</span></span>
+      <span class="pill" title="Czas">⏱ <span id="mzT">0:00</span></span>
+    </div>
     <div class="pilkHud">
       <span class="pill" title="Gole">⚽ <span id="pkGoals">0</span>/10</span>
       <span class="pill" title="Strzały">🥅 <span id="pkShots">0</span></span>
@@ -366,6 +410,13 @@ body.dyktmode .dyktHud{display:flex}
       <select class="dsel" id="pjSelect" aria-label="Wybierz świat"></select>
       <button class="pill" id="pjRestart" type="button">↻ Od nowa</button>
       <span class="pjhint">← → chodzenie · spacja skok · skok w powietrzu = sufit · ↓ puść sufit</span>
+    </div>
+    <div class="mathbar" id="mazebar" hidden>
+      <select class="dsel" id="mzSelect" aria-label="Wybierz labirynt"></select>
+      <button class="pill" id="mzMapBtn" type="button" title="Pokaż lub ukryj mapkę">🗺 Mapka</button>
+      <button class="pill" id="mzViewBtn" type="button" title="Widok z oczu lub zza pleców pajączka (V)">👁 Widok z tyłu</button>
+      <button class="pill" id="mzRestart" type="button">↻ Od nowa</button>
+      <span class="pjhint mzhint">↑ ↓ / W S idź · ← → / A D obracaj · SPACJA nić: na sufit / w dół · V widok · M mapka</span>
     </div>
     <div class="mathbar" id="pilkbar" hidden>
       <div class="seg" role="group" aria-label="Bramkarz">
@@ -417,6 +468,11 @@ body.dyktmode .dyktHud{display:flex}
     <div class="picnic" id="picnic" aria-hidden="true"></div>
     <canvas class="pitch" id="pitch" aria-label="Boisko: dotknij bramki, żeby wycelować, i puść, żeby strzelić"></canvas>
     <canvas class="pjc" id="pajCanvas" aria-label="Pajączek: chodź, skacz i przyczepiaj się do sufitu, zbieraj poziomki, jagody i monety"></canvas>
+    <canvas class="mzc" id="mzCanvas" aria-label="Labirynt 3D: pajączek idzie przez labirynt do mety i zbiera poziomki, jagody, monety i diamenty"></canvas>
+    <div class="mzpad" id="mzPad">
+      <div><button type="button" data-k="L" aria-label="Obróć w lewo">◀</button><button type="button" data-k="R" aria-label="Obróć w prawo">▶</button></div>
+      <div><button type="button" data-k="Z" aria-label="Nić: na sufit lub w dół">🕸</button><button type="button" data-k="D" aria-label="Do tyłu">▼</button><button type="button" data-k="U" aria-label="Do przodu">▲</button></div>
+    </div>
     <div class="pjpad" id="pjPad">
       <div><button type="button" data-k="L" aria-label="W lewo">◀</button><button type="button" data-k="R" aria-label="W prawo">▶</button></div>
       <div><button type="button" data-k="Z" aria-label="Sieć do sufitu">🕸</button><button type="button" data-k="J" aria-label="Skok">⤒</button></div>
@@ -443,6 +499,7 @@ body.dyktmode .dyktHud{display:flex}
       <button class="level pilk" id="pilkBtn" type="button"><b>Piłkomat</b><span>rzuty karne – strzel 10 goli!</span></button>
       <button class="level lap" id="lapBtn" type="button"><b>Łapkomat</b><span>łapki kradną owoce – daj im po łapkach!</span></button>
       <button class="level paj" id="pajBtn" type="button"><b>Pajączek</b><span>skacz, chodź po suficie i zbieraj poziomki!</span></button>
+      <button class="level maze" id="mazeBtn" type="button"><b>Labirynt 3D</b><span>pajączek idzie do mety i zbiera skarby</span></button>
     </div>
     <p class="note">Włącz dźwięk, żeby słyszeć muzykę.</p>
   </div>
@@ -3636,13 +3693,433 @@ function pjWrap(c, text, maxW){
   return out;
 }
 
+/* ---------- Labirynt 3D: raycasting z perspektywy pajączka ---------- */
+const MZ_FONT = '"Baloo 2","Comic Sans MS",system-ui,sans-serif';
+const MZ_LEVELS = [
+  {name:"Piwnica",         n:5,  wall:[158,128,100], mortar:[92,72,58],   brick:true,  floor:[70,56,46],   ceil:[40,34,44],   fog:[22,16,22],   tip:"Dojdź do mety 🏁. Skrzynia zagradza drogę? Naciśnij SPACJĘ: pajączek wyrzuci nić i wejdzie na sufit. Spacja jeszcze raz: zejdzie w dół."},
+  {name:"Żywopłot",        n:7,  wall:[62,150,72],   mortar:null,         brick:false, floor:[104,160,82], ceil:[48,112,58],  fog:[150,200,170],tip:"Zielony labirynt w ogrodzie. Poziomki i jagody czekają!"},
+  {name:"Lodowa jaskinia", n:9,  wall:[150,200,235], mortar:[205,232,250],brick:true,  floor:[196,226,245],ceil:[40,60,110],  fog:[26,40,86],   tip:"Brrr… ale skarby są w środku!"},
+  {name:"Kopalnia",        n:11, wall:[170,110,60],  mortar:[70,44,26],   brick:true,  floor:[60,44,32],   ceil:[28,22,20],   fog:[14,10,8],    tip:"Ciemno! Szukaj monet i diamentów."},
+  {name:"Zamek",           n:13, wall:[128,96,170],  mortar:[60,44,86],   brick:true,  floor:[60,48,72],   ceil:[26,20,44],   fog:[14,10,26],   tip:"Ostatni, największy labirynt. Powodzenia!"},
+];
+const MZ_ITEMS = {
+  o:{e:"🍓", name:"Poziomka!",  notes:[84,88]},
+  j:{e:"🫐", name:"Jagoda!",    notes:[79,86]},
+  c:{e:"🪙", name:"Moneta!",    notes:[88,95]},
+  d:{e:"💎", name:"Diament!",   notes:[91,96,100]},
+};
+const MZ_WH = 2.2, MZ_BOX = 1.0, MZ_HANG = 1.2, MZ_EYE = 0.35, MZ_PLEN = 1.1, MZ_BW = 400, MZ_FOGD = 11;
+const mzCv = $("mzCanvas"), mzc = mzCv.getContext("2d");
+const mzBuf = document.createElement("canvas"), mzBc = mzBuf.getContext("2d"), mzHits = [];
+let mzImg = null, mzPix = null;
+const mzKeys = {L:false, R:false, U:false, D:false};
+const mzSpriteCache = {};
+let mz = null, mzRaf = 0, mzLast = 0, mzAll = {o:0, j:0, c:0, d:0}, mzShowMap = true, mzThird = false;
+const mzH = (a, b) => { const s = Math.sin(a*127.1 + b*311.7)*43758.5453; return s - Math.floor(s); };
+const mzFmt = s => Math.floor(s/60) + ":" + String(Math.floor(s%60)).padStart(2, "0");
+/* sprite'y jako pixel-art 16×16: emotka zmniejszona i z twardym progiem przezroczystości */
+function mzSprite(e){
+  if (mzSpriteCache[e]) return mzSpriteCache[e];
+  const big = document.createElement("canvas"); big.width = big.height = 64;
+  const b = big.getContext("2d"); b.font = "52px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";
+  b.textAlign = "center"; b.textBaseline = "middle"; b.fillText(e, 32, 35);
+  const cv = document.createElement("canvas"); cv.width = cv.height = 16;
+  const c = cv.getContext("2d"); c.imageSmoothingQuality = "high"; c.drawImage(big, 0, 0, 16, 16);
+  const d = c.getImageData(0, 0, 16, 16); for (let i = 3; i < d.data.length; i += 4) d.data[i] = d.data[i] > 110 ? 255 : 0;
+  c.putImageData(d, 0, 0);
+  return mzSpriteCache[e] = cv;
+}
+/* kwadratowy pajączek widziany z tyłu (jak w małym pajączku z 2D): kwadratowy tułów i małe kwadratowe nóżki */
+const MZ_SPIDER = [
+  "................", "................", "....LLLLLLLL....", "...DDDDDDDDDD...", "..kDdDDDDDDdDk..", ".kkDDDDdDDDDDkk.", "..kDDdDDDDdDDk..", ".kkDDDDDDDDDDkk.",
+  "..kDDDDDdDDDDk..", ".kkDdDDDDDdDDkk.", "..kDDDDDDDDDDk..", "...DDDDDDDDDD...", "...kk......kk...", "...k........k...", "................", "................"];
+function mzSpiderImg(flip){
+  const key = "spider" + flip; if (mzSpriteCache[key]) return mzSpriteCache[key];
+  const cv = document.createElement("canvas"); cv.width = cv.height = 16; const c = cv.getContext("2d");
+  const col = {D:"#3A3A3A", d:"#2C2C2C", L:"#5A5A5A", k:"#1E1E1E"};
+  MZ_SPIDER.forEach((row, y) => [...row].forEach((ch, x) => { if (col[ch]){ c.fillStyle = col[ch]; c.fillRect(x, flip ? 15 - y : y, 1, 1); } }));
+  return mzSpriteCache[key] = cv;
+}
+/* tekstury 16×16 w stylu klockowym, generowane procedurą dla każdego świata */
+function mzTexGen(th){
+  const mk = fn => { const t = new Uint8Array(768); for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++){ const c = fn(x, y), i = (y*16 + x)*3; t[i] = c[0]; t[i+1] = c[1]; t[i+2] = c[2]; } return t; };
+  const sh = (c, v) => [c[0]*v, c[1]*v, c[2]*v], nz = (x, y, s) => 0.88 + mzH(x + s, y*1.7 + s)*0.24;
+  return {
+    wall: mk((x, y) => {
+      if (!th.brick) return sh(th.wall, 0.65 + mzH(x, y)*0.6);
+      const row = y >> 2, off = (row % 2)*4, bx = (x + off) % 8, id = Math.floor((x + off)/8);
+      if (y % 4 === 0 || bx === 0) return th.mortar;
+      return sh(th.wall, nz(x, y, row*3 + id*5)*(0.9 + mzH(id, row)*0.2));
+    }),
+    floor: mk((x, y) => sh(th.floor, (((x >> 3) + (y >> 3)) % 2 ? 0.9 : 1.05)*nz(x, y, 40))),
+    ceil: mk((x, y) => sh(th.ceil, (x % 8 === 0 || y % 8 === 0 ? 0.7 : 1)*nz(x, y, 80))),
+    crate: mk((x, y) => (x === 0 || y === 0 || x === 15 || y === 15 || x === y || x + y === 15) ? [92,58,28] : sh([176,126,64], nz(x, y, 9)*(0.85 + 0.15*((y >> 2) % 2)))),
+    crateTop: mk((x, y) => (x % 15 === 0 || y % 15 === 0) ? [110,70,34] : sh([190,140,76], nz(x, y, 11))),
+    hang: mk((x, y) => ((x + y) % 8 === 0 || (x - y + 16) % 8 === 0) ? [226,226,232] : sh([74,74,92], nz(x, y, 15))),
+    hangBot: mk((x, y) => (x % 15 === 0 || y % 15 === 0) ? [226,226,232] : sh([58,58,74], nz(x, y, 17))),
+  };
+}
+function mzPut(o, tex, u, v, k, fog){
+  const i = (((v*16) | 0) & 15)*48 + (((u*16) | 0) & 15)*3, f = 1 - k;
+  mzPix[o] = 0xFF000000 | ((tex[i+2]*k + fog[2]*f) | 0) << 16 | ((tex[i+1]*k + fog[1]*f) | 0) << 8 | ((tex[i]*k + fog[0]*f) | 0);
+}
+function mzGen(n){
+  const S = 2*n + 1, g = Array.from({length:S}, () => new Uint8Array(S).fill(1));
+  const seen = new Set(["0,0"]), stack = [[0,0]]; g[1][1] = 0;
+  while (stack.length){
+    const [cx, cy] = stack[stack.length - 1];
+    const nb = [[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy]) => [cx+dx, cy+dy, dx, dy]).filter(([x,y]) => x >= 0 && y >= 0 && x < n && y < n && !seen.has(x + "," + y));
+    if (!nb.length){ stack.pop(); continue; }
+    const [x, y, dx, dy] = pick(nb);
+    g[2*cy + 1 + dy][2*cx + 1 + dx] = 0; g[2*y + 1][2*x + 1] = 0; seen.add(x + "," + y); stack.push([x, y]);
+  }
+  /* kilka dodatkowych przejść, żeby były pętle i nie tylko jedna droga */
+  let extra = Math.round(n*n*0.12);
+  for (let i = 0; i < 600 && extra > 0; i++){
+    const x = 1 + Math.floor(Math.random()*(S - 2)), y = 1 + Math.floor(Math.random()*(S - 2));
+    if (g[y][x] === 0 || (x%2) === (y%2)) continue;
+    const horiz = x%2 === 0;
+    if (horiz ? (g[y][x-1] === 0 && g[y][x+1] === 0) : (g[y-1][x] === 0 && g[y+1][x] === 0)){ g[y][x] = 0; extra--; }
+  }
+  return g;
+}
+function mzOpen(g, x, y){ return g[y][x] === 0 ? 1 : 0; }
+function mzBuild(lvl){
+  const th = MZ_LEVELS[lvl], n = th.n, S = 2*n + 1, g = mzGen(n);
+  /* meta: najdalsza komórka od startu (BFS) */
+  const dist = Array.from({length:S}, () => new Int16Array(S).fill(-1)), q = [[1,1]]; dist[1][1] = 0;
+  let far = [1,1];
+  for (let i = 0; i < q.length; i++){
+    const [x, y] = q[i];
+    if (dist[y][x] > dist[far[1]][far[0]] && x%2 && y%2) far = [x, y];
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy]) => { const nx = x+dx, ny = y+dy; if (g[ny][nx] === 0 && dist[ny][nx] < 0){ dist[ny][nx] = dist[y][x] + 1; q.push([nx, ny]); } });
+  }
+  /* przeszkody: 1 = skrzynia na podłodze (przejście górą, po suficie), 2 = blok wiszący z sufitu (przejście dołem).
+     Zawsze ≥4 pola od siebie, od startu i mety, więc między nimi jest miejsce, żeby wejść na sufit albo zejść. */
+  const ob = new Uint8Array(S*S), placed = [];
+  const spotOk = (x, y) => !ob[y*S + x] && Math.abs(x - 1) + Math.abs(y - 1) >= 4 && Math.abs(x - far[0]) + Math.abs(y - far[1]) >= 4 && placed.every(([px, py]) => Math.abs(px - x) + Math.abs(py - y) >= 4);
+  const place = (x, y) => { ob[y*S + x] = lvl === 0 || Math.random() < 0.6 ? 1 : 2; placed.push([x, y]); };
+  const path = [];
+  for (let cx = far[0], cy = far[1]; dist[cy][cx] > 0;){
+    path.push([cx, cy]);
+    [cx, cy] = [[1,0],[-1,0],[0,1],[0,-1]].map(([ax, ay]) => [cx + ax, cy + ay]).find(([qx, qy]) => g[qy][qx] === 0 && dist[qy][qx] === dist[cy][cx] - 1);
+  }
+  let need = [2, 3, 4, 5, 6][lvl];
+  for (const [x, y] of shuffle(path.slice())) if (need > 0 && spotOk(x, y)){ place(x, y); need--; }
+  let decoys = Math.floor(n/2);
+  const free = []; for (let y = 1; y < S - 1; y++) for (let x = 1; x < S - 1; x++) if (g[y][x] === 0) free.push([x, y]);
+  for (const [x, y] of shuffle(free)) if (decoys > 0 && spotOk(x, y)){ place(x, y); decoys--; }
+  const cells = [], dead = [];
+  for (let y = 1; y < S; y += 2) for (let x = 1; x < S; x += 2){
+    if ((x === 1 && y === 1) || (x === far[0] && y === far[1]) || ob[y*S + x]) continue;
+    const exits = mzOpen(g, x+1, y) + mzOpen(g, x-1, y) + mzOpen(g, x, y+1) + mzOpen(g, x, y-1);
+    (exits === 1 ? dead : cells).push([x, y]);
+  }
+  const spots = shuffle(dead).concat(shuffle(cells)), count = Math.min(spots.length, Math.round(n*n*0.45));
+  const items = [], tot = {o:0, j:0, c:0, d:0};
+  for (let i = 0; i < count; i++){
+    const r = Math.random(), k = r < 0.4 ? "o" : r < 0.7 ? "j" : r < 0.93 ? "c" : "d";
+    /* część rzeczy wisi przy suficie: zbierzesz je tylko z sufitu */
+    items.push({x:spots[i][0] + 0.5, y:spots[i][1] + 0.5, z:Math.random() < 0.4 ? MZ_WH - 0.45 : 0.45, k, taken:false, ph:rand(0, 6)}); tot[k]++;
+  }
+  /* nagroda nad każdą skrzynią: do zdobycia, gdy przejdziesz po suficie */
+  for (let y = 1; y < S - 1; y++) for (let x = 1; x < S - 1; x++) if (ob[y*S + x] === 1){
+    const k = Math.random() < 0.5 ? "c" : "d"; items.push({x:x + 0.5, y:y + 0.5, z:MZ_WH - 0.45, k, taken:false, ph:rand(0, 6)}); tot[k]++;
+  }
+  const a = g[1][2] === 0 ? 0 : Math.PI/2;
+  return {lvl, th, n, S, g, ob, tex:mzTexGen(th), act:false, bob:0, items, tot, goal:{x:far[0] + 0.5, y:far[1] + 0.5}, got:{o:0, j:0, c:0, d:0},
+    sp:{x:1.5, y:1.5, a, walk:0, mv:0, z:MZ_EYE, mode:"floor", vz:0}, state:"play", clock:0, time:0, introUntil:lvl === 0 ? 6.5 : 3.2, winT:0, toast:null, seen:new Uint8Array(S*S), zb:new Float32Array(MZ_BW)};
+}
+function mzHudUpdate(){
+  if (!mz) return;
+  $("mzName").textContent = (mz.lvl + 1) + ". " + mz.th.name;
+  ["O","J","C","D"].forEach(k => { const lk = k.toLowerCase(); $("mz" + k).textContent = mz.got[lk] + "/" + mz.tot[lk]; });
+  $("mzT").textContent = mzFmt(mz.time);
+}
+function startMaze(lvl = 0, carry = false){
+  if (!carry) mzAll = {o:0, j:0, c:0, d:0};
+  mz = mzBuild(Math.max(0, Math.min(MZ_LEVELS.length - 1, lvl)));
+  $("mzSelect").value = String(mz.lvl);
+  $("endScreen").hidden = true;
+  mzHudUpdate(); mzStartLoop();
+}
+function mzStartLoop(){ if (!mzRaf){ mzLast = performance.now(); mzRaf = requestAnimationFrame(mzFrame); } }
+function stopMaze(){ if (mzRaf) cancelAnimationFrame(mzRaf); mzRaf = 0; Object.keys(mzKeys).forEach(k => mzKeys[k] = false); document.querySelectorAll("#mzPad button.on").forEach(b => b.classList.remove("on")); }
+/* layer: "floor" (blokują skrzynie), "ceil" (blokują wiszące bloki); ściany blokują zawsze */
+function mzBlocked(x, y, layer, r = 0.2){
+  for (const [ox, oy] of [[-r,-r],[r,-r],[-r,r],[r,r]]){
+    const cx = Math.floor(x + ox), cy = Math.floor(y + oy);
+    if (mz.g[cy][cx]) return true;
+    const o = mz.ob[cy*mz.S + cx];
+    if ((layer === "floor" && o === 1) || (layer === "ceil" && o === 2)) return true;
+  }
+  return false;
+}
+function mzPickup(it){
+  it.taken = true; mz.got[it.k]++; mzAll[it.k]++;
+  const d = MZ_ITEMS[it.k];
+  mz.toast = {txt:d.name + " " + d.e, t:mz.clock};
+  if (ctx) d.notes.forEach((m, i) => tone(mtof(m), ctx.currentTime + i*0.07, 0.25, {type:"triangle", vol:0.22}));
+  const r = mzCv.getBoundingClientRect(); starBurst(r.left + r.width/2, r.top + r.height*0.6); run();
+  mzHudUpdate();
+}
+function mzAdvance(){
+  if (mz.lvl < MZ_LEVELS.length - 1){ startMaze(mz.lvl + 1, true); return; }
+  mz.state = "over";
+  $("endFaces").textContent = "🕷️🏁🕷️";
+  $("endTitle").textContent = "Hurra!";
+  $("endText").innerHTML = `Wyszedłeś ze wszystkich labiryntów!<br>🍓 ${mzAll.o} · 🫐 ${mzAll.j} · 🪙 ${mzAll.c} · 💎 ${mzAll.d}`;
+  $("endScreen").hidden = false;
+}
+function mzFrame(now){
+  mzRaf = requestAnimationFrame(mzFrame);
+  if (!mz) return;
+  const dt = Math.min(0.05, (now - mzLast)/1000); mzLast = now;
+  mz.clock += dt;
+  const paused = !$("startScreen").hidden || !$("endScreen").hidden || !$("dkAddScreen").hidden;
+  if (!paused) mzUpdate(dt);
+  mzRender();
+}
+function mzUpdate(dt){
+  const sp = mz.sp;
+  if (mz.state === "win"){ if (mz.clock - mz.winT > 3.2) mzAdvance(); return; }
+  if (mz.state !== "play") return;
+  mz.time += dt;
+  sp.a += ((mzKeys.R ? 1 : 0) - (mzKeys.L ? 1 : 0))*2.3*dt;
+  const say = txt => { mz.toast = {txt, t:mz.clock}; };
+  if (mz.act){
+    mz.act = false;
+    if (sp.mode === "floor"){
+      if (mzBlocked(sp.x, sp.y, "ceil", 0.25)) say("Tu nić się nie złapie!");
+      else { sp.mode = "rise"; say("Nić! 🕸"); if (ctx) noiseSweep({dur:0.35, type:"bandpass", f0:800, f1:3200, q:2, vol:0.12}); }
+    } else if (sp.mode === "ceil"){
+      if (mzBlocked(sp.x, sp.y, "floor", 0.25)) say("Pod spodem jest przeszkoda!");
+      else { sp.mode = "fall"; sp.vz = 0; say("Zejście 🕸"); }
+    }
+  }
+  sp.mv = 0;
+  if (sp.mode === "floor" || sp.mode === "ceil"){
+    const v = ((mzKeys.U ? 1 : 0) - (mzKeys.D ? 1 : 0))*(mzKeys.D && !mzKeys.U ? 1.6 : 2.5);
+    sp.mv = v;
+    if (v){
+      const nx = sp.x + Math.cos(sp.a)*v*dt, ny = sp.y + Math.sin(sp.a)*v*dt;
+      if (!mzBlocked(nx, sp.y, sp.mode)) sp.x = nx;
+      if (!mzBlocked(sp.x, ny, sp.mode)) sp.y = ny;
+      sp.walk += Math.abs(v)*dt;
+    }
+  } else if (sp.mode === "rise"){
+    sp.z += 2.6*dt;
+    if (sp.z >= MZ_WH - MZ_EYE){ sp.z = MZ_WH - MZ_EYE; sp.mode = "ceil"; }
+  } else {
+    sp.vz += 10*dt; sp.z -= sp.vz*dt;
+    if (sp.z <= MZ_EYE){ sp.z = MZ_EYE; sp.mode = "floor"; sp.vz = 0; }
+  }
+  const cx = Math.floor(sp.x), cy = Math.floor(sp.y);
+  for (let y = cy - 1; y <= cy + 1; y++) for (let x = cx - 1; x <= cx + 1; x++) if (x >= 0 && y >= 0 && x < mz.S && y < mz.S) mz.seen[y*mz.S + x] = 1;
+  for (const it of mz.items) if (!it.taken && Math.hypot(it.x - sp.x, it.y - sp.y) < 0.5 && Math.abs(it.z - sp.z) < 0.75) mzPickup(it);
+  if (Math.hypot(mz.goal.x - sp.x, mz.goal.y - sp.y) < 0.55){
+    mz.state = "win"; mz.winT = mz.clock;
+    soundGood(); confetti(); run();
+  }
+  mzHudUpdate();
+}
+/* render 3D per piksel do małego bufora (efekt klocków), potem powiększony bez wygładzania */
+function mzDraw3D(cx, cy, a, eye, BW, BH){
+  const th = mz.th, T = mz.tex, S = mz.S, g = mz.g, ob = mz.ob, fog = th.fog, zb = mz.zb;
+  const dx = Math.cos(a), dy = Math.sin(a), px = -dy*MZ_PLEN, py = dx*MZ_PLEN, scale = BW/(2*MZ_PLEN);
+  const hor = BH/2 + mz.bob*BH, x0 = dx - px, y0 = dy - py, ex = 2*px/BW, ey = 2*py/BW;
+  /* podłoga i sufit */
+  for (let y = 0; y < BH; y++){
+    const d = y + 0.5 - hor, fl = d > 0, t = (fl ? eye : MZ_WH - eye)*scale/Math.max(0.5, Math.abs(d));
+    const k = Math.max(0.12, 1 - t/MZ_FOGD), tex = fl ? T.floor : T.ceil, row = y*BW, sx = ex*t, sy = ey*t;
+    let wx = cx + x0*t, wy = cy + y0*t;
+    for (let x = 0; x < BW; x++){ mzPut(row + x, tex, wx - Math.floor(wx), wy - Math.floor(wy), k, fog); wx += sx; wy += sy; }
+  }
+  /* ściany i przeszkody: dla każdej kolumny zbieramy trafione pola i rysujemy od najdalszego */
+  for (let x = 0; x < BW; x++){
+    const camX = 2*(x + 0.5)/BW - 1, rx = dx + px*camX, ry = dy + py*camX;
+    let mx = Math.floor(cx), my = Math.floor(cy);
+    const ddx = rx === 0 ? 1e30 : Math.abs(1/rx), ddy = ry === 0 ? 1e30 : Math.abs(1/ry);
+    let stx, sty, sdx, sdy;
+    if (rx < 0){ stx = -1; sdx = (cx - mx)*ddx; } else { stx = 1; sdx = (mx + 1 - cx)*ddx; }
+    if (ry < 0){ sty = -1; sdy = (cy - my)*ddy; } else { sty = 1; sdy = (my + 1 - cy)*ddy; }
+    mzHits.length = 0;
+    const o0 = ob[my*S + mx];
+    if (o0) mzHits.push({k:o0, tin:0.05, tout:Math.min(sdx, sdy), side:0, u:0, top:true});
+    for (let guard = 0; guard < 90; guard++){
+      let side;
+      if (sdx < sdy){ sdx += ddx; mx += stx; side = 0; } else { sdy += ddy; my += sty; side = 1; }
+      const tin = side === 0 ? sdx - ddx : sdy - ddy;
+      let u = side === 0 ? cy + tin*ry : cx + tin*rx; u -= Math.floor(u);
+      if (mx < 0 || my < 0 || mx >= S || my >= S || g[my][mx]){ mzHits.push({k:0, tin, side, u}); break; }
+      const o = ob[my*S + mx];
+      if (o) mzHits.push({k:o, tin, tout:Math.min(sdx, sdy), side, u});
+    }
+    zb[x] = 99;
+    for (const h of mzHits) if (!h.top){ zb[x] = h.tin; break; }
+    for (let j = mzHits.length - 1; j >= 0; j--){
+      const h = mzHits[j], tin = Math.max(0.05, h.tin), k = Math.max(0.12, 1 - tin/MZ_FOGD)*(h.side ? 0.8 : 1);
+      if (!h.top){
+        const zlo = h.k === 2 ? MZ_HANG : 0, zhi = h.k === 1 ? MZ_BOX : MZ_WH, tex = h.k === 0 ? T.wall : h.k === 1 ? T.crate : T.hang;
+        const ya = Math.max(0, Math.ceil(hor - (zhi - eye)*scale/tin - 0.5)), yb = Math.min(BH - 1, Math.floor(hor - (zlo - eye)*scale/tin - 0.5));
+        for (let y = ya; y <= yb; y++){ const z = eye + (hor - (y + 0.5))*tin/scale; mzPut(y*BW + x, tex, h.u, z - zlo, k, fog); }
+      }
+      if (h.k && (h.k === 1 ? eye > MZ_BOX : eye < MZ_HANG)){
+        const zf = h.k === 1 ? MZ_BOX : MZ_HANG, tex2 = h.k === 1 ? T.crateTop : T.hangBot, tout = Math.max(h.tout, tin + 0.001);
+        const yA = hor - (zf - eye)*scale/tout, yB = hor - (zf - eye)*scale/tin;
+        const ya = Math.max(0, Math.ceil(Math.min(yA, yB) - 0.5)), yb = Math.min(BH - 1, Math.floor(Math.max(yA, yB) - 0.5));
+        for (let y = ya; y <= yb; y++){
+          const dd = hor - (y + 0.5); if (Math.abs(dd) < 0.01) continue;
+          const t = (zf - eye)*scale/dd; if (t <= 0) continue;
+          const wx = cx + rx*t, wy = cy + ry*t;
+          mzPut(y*BW + x, tex2, wx - Math.floor(wx), wy - Math.floor(wy), Math.max(0.12, 1 - t/MZ_FOGD), fog);
+        }
+      }
+    }
+  }
+  return hor;
+}
+function mzRender(){
+  const cw = Math.max(200, Math.min(1400, mzCv.clientWidth)), ch = Math.max(150, Math.min(1000, mzCv.clientHeight));
+  if (mzCv.width !== cw || mzCv.height !== ch){ mzCv.width = cw; mzCv.height = ch; }
+  const BW = MZ_BW, BH = Math.max(120, Math.round(BW*ch/cw));
+  if (mzBuf.width !== BW || mzBuf.height !== BH){ mzBuf.width = BW; mzBuf.height = BH; mzImg = mzBc.createImageData(BW, BH); mzPix = new Uint32Array(mzImg.data.buffer); }
+  const sp = mz.sp, c = mzBc, dx = Math.cos(sp.a), dy = Math.sin(sp.a), scale = BW/(2*MZ_PLEN);
+  mz.bob = sp.mv ? Math.sin(sp.walk*9)*0.01 : 0;
+  let cx = sp.x, cy = sp.y, eye = sp.z;
+  if (mzThird){
+    let d = 1.3; while (d > 0 && mzBlocked(sp.x - dx*d, sp.y - dy*d, "none", 0.12)) d -= 0.1;
+    cx = sp.x - dx*Math.max(0, d); cy = sp.y - dy*Math.max(0, d); eye = sp.z + (sp.mode === "ceil" ? -0.3 : 0.3);
+  }
+  const hor = mzDraw3D(cx, cy, sp.a, eye, BW, BH);
+  c.putImageData(mzImg, 0, 0); c.imageSmoothingEnabled = false;
+  /* przedmioty, meta i (w widoku z tyłu) pajączek jako sprite'y */
+  const list = [];
+  mz.items.forEach(it => { if (!it.taken) list.push({x:it.x, y:it.y, z:it.z + Math.sin(mz.clock*3 + it.ph)*0.04, img:mzSprite(MZ_ITEMS[it.k].e), sz:0.5, spin:it.k === "c", ph:it.ph}); });
+  list.push({x:mz.goal.x, y:mz.goal.y, z:0.55, img:mzSprite("🏁"), sz:1.0, ph:0});
+  if (mzThird) list.push({x:sp.x, y:sp.y, z:sp.z, img:mzSpiderImg(sp.mode === "ceil"), sz:0.55, ph:0, me:true});
+  list.forEach(s => { const rx = s.x - cx, ry = s.y - cy; s.f = rx*dx + ry*dy; s.l = -rx*dy + ry*dx; });
+  list.filter(s => s.f > 0.15).sort((a, b) => b.f - a.f).forEach(s => {
+    const unit = scale/s.f, size = unit*s.sz, sx = BW/2*(1 + s.l/(MZ_PLEN*s.f)), cyS = hor - (s.z - eye)*unit, topY = cyS - size/2;
+    const wd = size*(s.spin ? Math.max(0.25, Math.abs(Math.cos(mz.clock*3 + s.ph))) : 1), x0 = sx - wd/2;
+    if (s.me){ /* nić od sufitu do pajączka, gdy wisi albo się wspina */
+      if (sp.mode !== "floor"){ const yc = hor - (MZ_WH - eye)*unit; c.fillStyle = "rgba(255,255,255,.9)"; c.fillRect(Math.round(sx), Math.max(0, yc), 1, Math.max(0, topY - yc)); }
+    }
+    c.globalAlpha = Math.max(0.3, 1 - s.f/14);
+    for (let px2 = Math.max(0, Math.floor(x0)); px2 < Math.min(BW, x0 + wd); px2++){
+      if (mz.zb[px2] < s.f) continue;
+      c.drawImage(s.img, Math.min(15, ((px2 + 0.5 - x0)/wd*16) | 0), 0, 1, 16, px2, topY, 1, size);
+    }
+    c.globalAlpha = 1;
+  });
+  if (!mzThird) mzLegs(c, BW, BH);
+  mzc.imageSmoothingEnabled = false; mzc.drawImage(mzBuf, 0, 0, BW, BH, 0, 0, cw, ch);
+  if (mzShowMap) mzMiniMap(mzc, cw, ch);
+  mzOverlay(mzc, cw, ch);
+}
+/* małe kwadratowe nóżki przy dolnej krawędzi (na suficie: przy górnej), jak w małym pajączku */
+function mzLegs(c, BW, BH){
+  const sp = mz.sp, u = Math.max(2, Math.round(BH/36)), flip = sp.mode === "ceil";
+  const R = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), w, h); };
+  [0.3, 0.4, 0.6, 0.7].forEach((fx, i) => {
+    const x = Math.round(BW*fx/u)*u, lift = sp.mv && Math.sin(sp.walk*9 + i*1.9) > 0.3 ? u*0.6 : 0, out = fx < 0.5 ? -u : u, col = i % 2 ? "#2B2B2B" : "#1E1E1E";
+    if (flip){ R(x, lift, u, 3*u, col); R(x + out, lift + 2*u, u, u, col); R(x, lift, u, 1, "#555"); }
+    else { R(x, BH - 3*u - lift, u, 3*u, col); R(x + out, BH - u - lift, u, u, col); R(x, BH - 3*u - lift, u, 1, "#555"); }
+  });
+  if (sp.mode === "rise" || sp.mode === "fall") R(BW/2, 0, 1, BH*0.5, "rgba(255,255,255,.9)");
+}
+function mzMiniMap(c, W, H){
+  const S = mz.S, ms = Math.min(W, H)*0.34, cs = ms/S, ox = W - ms - 12, oy = 12;
+  c.fillStyle = "rgba(10,10,20,.55)"; c.fillRect(ox - 5, oy - 5, ms + 10, ms + 10);
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) if (mz.seen[y*S + x]){
+    c.fillStyle = mz.g[y][x] ? "rgba(255,255,255,.6)" : "rgba(255,224,122,.2)";
+    c.fillRect(ox + x*cs, oy + y*cs, cs + 0.5, cs + 0.5);
+  }
+  mz.items.forEach(it => { if (!it.taken && mz.seen[Math.floor(it.y)*S + Math.floor(it.x)]){ c.fillStyle = "#FFD23F"; c.beginPath(); c.arc(ox + it.x*cs, oy + it.y*cs, Math.max(1.5, cs*0.35), 0, Math.PI*2); c.fill(); } });
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++){
+    const o = mz.ob[y*S + x];
+    if (o && mz.seen[y*S + x]){ c.fillStyle = o === 1 ? "#B8793A" : "#9AA0C8"; c.fillRect(ox + x*cs, oy + y*cs, cs + 0.5, cs + 0.5); }
+  }
+  const gb = 0.6 + 0.4*Math.abs(Math.sin(mz.clock*4));
+  c.fillStyle = `rgba(239,106,76,${gb})`; c.beginPath(); c.arc(ox + mz.goal.x*cs, oy + mz.goal.y*cs, Math.max(2.5, cs*0.8), 0, Math.PI*2); c.fill();
+  const px = ox + mz.sp.x*cs, py = oy + mz.sp.y*cs, a = mz.sp.a, r = Math.max(3, cs*0.9);
+  c.fillStyle = "#7CFFA0"; c.beginPath();
+  c.moveTo(px + Math.cos(a)*r*1.4, py + Math.sin(a)*r*1.4); c.lineTo(px + Math.cos(a + 2.5)*r, py + Math.sin(a + 2.5)*r); c.lineTo(px + Math.cos(a - 2.5)*r, py + Math.sin(a - 2.5)*r); c.fill();
+}
+function mzOverlay(c, W, H){
+  const outline = (txt, x, y, size, fill) => {
+    c.font = `800 ${size}px ${MZ_FONT}`; c.textAlign = "center"; c.textBaseline = "middle";
+    c.lineWidth = Math.max(4, size*0.14); c.lineJoin = "round"; c.strokeStyle = "#24324A"; c.strokeText(txt, x, y); c.fillStyle = fill; c.fillText(txt, x, y);
+  };
+  if (mz.state === "win" || mz.state === "over"){
+    const a = Math.min(1, 0.4 + (mz.clock - mz.winT)*2.5);
+    c.save(); c.translate(W/2, H*0.38); c.scale(a, a);
+    outline("Brawo!", 0, 0, Math.min(90, W*0.15), "#FFE07A");
+    const sub = mz.lvl < MZ_LEVELS.length - 1 ? "Dalej: " + MZ_LEVELS[mz.lvl + 1].name : "Koniec wyprawy!";
+    outline(sub + "  ·  ⏱ " + mzFmt(mz.time), 0, Math.min(70, W*0.11), Math.min(28, W*0.05), "#FFFFFF");
+    c.restore();
+    return;
+  }
+  if (mz.clock < mz.introUntil){
+    c.save(); c.globalAlpha = Math.min(1, (mz.introUntil - mz.clock)*2);
+    outline(mz.th.name, W/2, H*0.3, Math.min(72, W*0.12), "#FFFFFF");
+    const fs = Math.max(13, Math.min(20, W*0.034));
+    c.font = `700 ${fs}px ${MZ_FONT}`;
+    const lines = pjWrap(c, mz.th.tip, W - 60), bw = Math.max(...lines.map(l => c.measureText(l).width)) + 28, bh = lines.length*fs*1.3 + 14;
+    c.fillStyle = "rgba(255,255,255,.93)"; c.beginPath();
+    if (c.roundRect) c.roundRect(W/2 - bw/2, H*0.3 + 40, bw, bh, 14); else c.rect(W/2 - bw/2, H*0.3 + 40, bw, bh);
+    c.fill(); c.fillStyle = "#24324A"; c.textAlign = "center"; c.textBaseline = "middle";
+    lines.forEach((l, i) => c.fillText(l, W/2, H*0.3 + 40 + 7 + fs*0.65 + i*fs*1.3));
+    c.restore();
+  }
+  if (mz.toast && mz.clock - mz.toast.t < 1.1){
+    const a = (mz.clock - mz.toast.t)/1.1;
+    c.save(); c.globalAlpha = 1 - a*a;
+    outline(mz.toast.txt, W/2, H*0.62 - a*H*0.06, Math.min(44, W*0.08), "#FFE07A");
+    c.restore();
+  }
+}
+(function setupMaze(){
+  $("mzSelect").innerHTML = MZ_LEVELS.map((l, i) => `<option value="${i}">${i + 1}. ${l.name} (${l.n}×${l.n})</option>`).join("");
+  $("mzSelect").addEventListener("change", e => { startMaze(+e.target.value); e.target.blur(); });
+  $("mzViewBtn").addEventListener("click", () => { mzThird = !mzThird; $("mzViewBtn").classList.toggle("off", !mzThird); });
+  $("mzViewBtn").classList.add("off");
+  $("mzRestart").addEventListener("click", () => startMaze(mz ? mz.lvl : 0, true));
+  $("mzMapBtn").addEventListener("click", () => { mzShowMap = !mzShowMap; $("mzMapBtn").classList.toggle("off", !mzShowMap); });
+  const KEYMAP = {ArrowLeft:"L", KeyA:"L", ArrowRight:"R", KeyD:"R", ArrowUp:"U", KeyW:"U", ArrowDown:"D", KeyS:"D"};
+  addEventListener("keydown", e => {
+    if (mode !== "maze" || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.code === "KeyM"){ $("mzMapBtn").click(); e.preventDefault(); e.stopPropagation(); return; }
+    if (e.code === "KeyV"){ $("mzViewBtn").click(); e.preventDefault(); e.stopPropagation(); return; }
+    if (e.code === "Space" || e.code === "KeyE"){ if (mz && !e.repeat) mz.act = true; e.preventDefault(); e.stopPropagation(); return; }
+    const k = KEYMAP[e.code]; if (!k) return;
+    mzKeys[k] = true; e.preventDefault(); e.stopPropagation();
+  }, true);
+  addEventListener("keyup", e => { const k = KEYMAP[e.code]; if (k) mzKeys[k] = false; }, true);
+  addEventListener("blur", () => Object.keys(mzKeys).forEach(k => mzKeys[k] = false));
+  $("mzPad").querySelectorAll("button").forEach(b => {
+    if (b.dataset.k === "Z"){ b.addEventListener("pointerdown", e => { e.preventDefault(); if (mz) mz.act = true; }); b.addEventListener("contextmenu", e => e.preventDefault()); return; }
+    const k = b.dataset.k, off = () => { mzKeys[k] = false; b.classList.remove("on"); };
+    b.addEventListener("pointerdown", e => { e.preventDefault(); mzKeys[k] = true; b.classList.add("on"); try { b.setPointerCapture(e.pointerId); } catch(_){} });
+    ["pointerup", "pointercancel", "lostpointercapture"].forEach(ev => b.addEventListener(ev, off));
+    b.addEventListener("contextmenu", e => e.preventDefault());
+  });
+  let drag = null;
+  mzCv.addEventListener("pointerdown", e => { drag = {id:e.pointerId, x:e.clientX}; try { mzCv.setPointerCapture(e.pointerId); } catch(_){} mzCv.style.cursor = "grabbing"; });
+  mzCv.addEventListener("pointermove", e => { if (drag && drag.id === e.pointerId && mz && mz.state === "play"){ mz.sp.a += (e.clientX - drag.x)*0.008; drag.x = e.clientX; } });
+  ["pointerup", "pointercancel"].forEach(ev => mzCv.addEventListener(ev, () => { drag = null; mzCv.style.cursor = ""; }));
+})();
+
 function chooseLevel(m){
   const changed = m !== mode;
   if (m !== "dykt" && typeof dkStopSpeak === "function") dkStopSpeak();
   if (mode === "lap" && m !== "lap") lapClear();
   if (mode === "pilk" && m !== "pilk") stopPilk();
   if (mode === "paj" && m !== "paj") stopPaj();
+  if (mode === "maze" && m !== "maze") stopMaze();
   mode = m;
+  document.body.classList.toggle("mazemode", m === "maze");
+  $("mazebar").hidden = m !== "maze";
   document.body.classList.toggle("pajmode", m === "paj");
   $("pajbar").hidden = m !== "paj";
   document.body.classList.toggle("lapmode", m === "lap");
@@ -3654,6 +4131,7 @@ function chooseLevel(m){
   $("pilkbar").hidden = m !== "pilk";
   updateBackgroundSound();
   if (m === "pilk"){ $("mathbar").hidden = true; return; }
+  if (m === "maze"){ $("mathbar").hidden = true; if (changed || !mz || mz.state === "over") startMaze(0); return; }
   if (m === "paj"){ $("mathbar").hidden = true; if (changed || !pj || pj.state === "over") startPaj(); return; }
   if (m === "lap"){ $("mathbar").hidden = true; return; }
   if (m === "dykt"){ $("mathbar").hidden = true; if (changed || !dk || dk.done) startDykt(); return; }
@@ -3675,6 +4153,7 @@ $("pilkBtn").addEventListener("click", () => { chooseLevel("pilk"); $("playBtn")
 setupPitch();
 $("lapBtn").addEventListener("click", () => { chooseLevel("lap"); $("playBtn").dispatchEvent(new Event("start")); });
 $("pajBtn").addEventListener("click", () => { chooseLevel("paj"); $("playBtn").dispatchEvent(new Event("start")); });
+$("mazeBtn").addEventListener("click", () => { chooseLevel("maze"); $("playBtn").dispatchEvent(new Event("start")); });
 setupPajbar();
 $("dyktBtn").addEventListener("click", () => { chooseLevel("dykt"); $("playBtn").dispatchEvent(new Event("start")); });
 setupDyktbar();
@@ -3690,6 +4169,7 @@ $("playBtn").addEventListener("start", () => {
   if (mode === "lap"){ startLap(); return; }
   if (mode === "pilk"){ startPilk(); return; }
   if (mode === "dykt") return;
+  if (mode === "maze"){ mzStartLoop(); return; }
   if (mode === "paj"){ if (!pjRaf){ pjLast = performance.now(); pjRaf = requestAnimationFrame(pjFrame); } return; }
   setTimeout(() => { locked = false; }, 500);
   schedulePeek();
@@ -3700,6 +4180,7 @@ $("againBtn").addEventListener("click", () => {
   if (mode === "pilk"){ startPilk(); return; }
   if (mode === "dykt"){ startDykt(); return; }
   if (mode === "paj"){ startPaj(0); return; }
+  if (mode === "maze"){ startMaze(0); return; }
   stars = 0; renderStars();
   startRound();
 });
