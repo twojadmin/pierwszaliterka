@@ -3696,7 +3696,7 @@ function pjWrap(c, text, maxW){
 /* ---------- Labirynt 3D: raycasting z perspektywy pajączka ---------- */
 const MZ_FONT = '"Baloo 2","Comic Sans MS",system-ui,sans-serif';
 const MZ_LEVELS = [
-  {name:"Piwnica",         n:5,  wall:[158,128,100], mortar:[92,72,58],   brick:true,  floor:[70,56,46],   ceil:[40,34,44],   fog:[22,16,22],   tip:"Dojdź do mety 🏁. Skrzynia zagradza drogę? Naciśnij SPACJĘ: pajączek wyrzuci nić i wejdzie na sufit. Spacja jeszcze raz: zejdzie w dół."},
+  {name:"Piwnica",         n:5,  wall:[158,128,100], mortar:[92,72,58],   brick:true,  floor:[70,56,46],   ceil:[40,34,44],   fog:[22,16,22],   tip:"Dojdź do mety 🏁. Kolce zagradzają drogę? Naciśnij SPACJĘ: pajączek wyrzuci nić i wejdzie na sufit. Spacja jeszcze raz: zejdzie w dół."},
   {name:"Żywopłot",        n:7,  wall:[62,150,72],   mortar:null,         brick:false, floor:[104,160,82], ceil:[48,112,58],  fog:[150,200,170],tip:"Zielony labirynt w ogrodzie. Poziomki i jagody czekają!"},
   {name:"Lodowa jaskinia", n:9,  wall:[150,200,235], mortar:[205,232,250],brick:true,  floor:[196,226,245],ceil:[40,60,110],  fog:[26,40,86],   tip:"Brrr… ale skarby są w środku!"},
   {name:"Kopalnia",        n:11, wall:[170,110,60],  mortar:[70,44,26],   brick:true,  floor:[60,44,32],   ceil:[28,22,20],   fog:[14,10,8],    tip:"Ciemno! Szukaj monet i diamentów."},
@@ -3708,7 +3708,7 @@ const MZ_ITEMS = {
   c:{e:"🪙", name:"Moneta!",    notes:[88,95]},
   d:{e:"💎", name:"Diament!",   notes:[91,96,100]},
 };
-const MZ_WH = 2.2, MZ_BOX = 1.0, MZ_HANG = 1.2, MZ_EYE = 0.35, MZ_PLEN = 1.1, MZ_BW = 400, MZ_FOGD = 11;
+const MZ_WH = 2.2, MZ_BOX = 0.8, MZ_HANG = 1.4, MZ_EYE = 0.35, MZ_PLEN = 1.1, MZ_BW = 400, MZ_FOGD = 11;
 const mzCv = $("mzCanvas"), mzc = mzCv.getContext("2d");
 const mzBuf = document.createElement("canvas"), mzBc = mzBuf.getContext("2d"), mzHits = [];
 let mzImg = null, mzPix = null;
@@ -3729,14 +3729,15 @@ function mzSprite(e){
   c.putImageData(d, 0, 0);
   return mzSpriteCache[e] = cv;
 }
-/* kwadratowy pajączek widziany z tyłu (jak w małym pajączku z 2D): kwadratowy tułów i małe kwadratowe nóżki */
+/* kwadratowy pajączek (jak w małym pajączku z 2D): kwadratowy tułów, białe kwadratowe oczka z czarnymi źrenicami
+   i krótkie kwadratowe nóżki tylko pod tułowiem */
 const MZ_SPIDER = [
-  "................", "................", "....LLLLLLLL....", "...DDDDDDDDDD...", "..kDdDDDDDDdDk..", ".kkDDDDdDDDDDkk.", "..kDDdDDDDdDDk..", ".kkDDDDDDDDDDkk.",
-  "..kDDDDDdDDDDk..", ".kkDdDDDDDdDDkk.", "..kDDDDDDDDDDk..", "...DDDDDDDDDD...", "...kk......kk...", "...k........k...", "................", "................"];
+  "................", "................", "...LLLLLLLLLL...", "...DDDDDDDDDD...", "...DWWDDDDWWD...", "...DWPDDDDPWD...", "...DDDDDDDDDD...", "...DDDwDDwDDD...",
+  "...DdDDDDDDdD...", "...DDDDdDDDDD...", "...DDDDDDDDDD...", "...DDDDDDDDDD...", "...k.k.kk.k.k...", "...k.k....k.k...", "................", "................"];
 function mzSpiderImg(flip){
   const key = "spider" + flip; if (mzSpriteCache[key]) return mzSpriteCache[key];
   const cv = document.createElement("canvas"); cv.width = cv.height = 16; const c = cv.getContext("2d");
-  const col = {D:"#3A3A3A", d:"#2C2C2C", L:"#5A5A5A", k:"#1E1E1E"};
+  const col = {D:"#3A3A3A", d:"#2C2C2C", L:"#5A5A5A", k:"#1E1E1E", W:"#FFFFFF", P:"#111111", w:"#CFCFCF"};
   MZ_SPIDER.forEach((row, y) => [...row].forEach((ch, x) => { if (col[ch]){ c.fillStyle = col[ch]; c.fillRect(x, flip ? 15 - y : y, 1, 1); } }));
   return mzSpriteCache[key] = cv;
 }
@@ -3744,6 +3745,13 @@ function mzSpiderImg(flip){
 function mzTexGen(th){
   const mk = fn => { const t = new Uint8Array(768); for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++){ const c = fn(x, y), i = (y*16 + x)*3; t[i] = c[0]; t[i+1] = c[1]; t[i+2] = c[2]; } return t; };
   const sh = (c, v) => [c[0]*v, c[1]*v, c[2]*v], nz = (x, y, s) => 0.88 + mzH(x + s, y*1.7 + s)*0.24;
+  /* kolce: 4 trójkąty o szerokości 4 px na ciemnym cokole; magenta = przezroczysty piksel */
+  const spike = (x, y, down) => {
+    const yy = down ? 15 - y : y, d = Math.abs((x % 4) - 1.5);
+    if (yy >= 13) return sh([74,74,86], nz(x, y, 30));
+    if (yy >= 1 + d*3) return sh(x % 4 < 2 ? [214,218,228] : [150,154,170], 1);
+    return [255, 0, 255];
+  };
   return {
     wall: mk((x, y) => {
       if (!th.brick) return sh(th.wall, 0.65 + mzH(x, y)*0.6);
@@ -3753,14 +3761,14 @@ function mzTexGen(th){
     }),
     floor: mk((x, y) => sh(th.floor, (((x >> 3) + (y >> 3)) % 2 ? 0.9 : 1.05)*nz(x, y, 40))),
     ceil: mk((x, y) => sh(th.ceil, (x % 8 === 0 || y % 8 === 0 ? 0.7 : 1)*nz(x, y, 80))),
-    crate: mk((x, y) => (x === 0 || y === 0 || x === 15 || y === 15 || x === y || x + y === 15) ? [92,58,28] : sh([176,126,64], nz(x, y, 9)*(0.85 + 0.15*((y >> 2) % 2)))),
-    crateTop: mk((x, y) => (x % 15 === 0 || y % 15 === 0) ? [110,70,34] : sh([190,140,76], nz(x, y, 11))),
-    hang: mk((x, y) => ((x + y) % 8 === 0 || (x - y + 16) % 8 === 0) ? [226,226,232] : sh([74,74,92], nz(x, y, 15))),
-    hangBot: mk((x, y) => (x % 15 === 0 || y % 15 === 0) ? [226,226,232] : sh([58,58,74], nz(x, y, 17))),
+    spikeF: mk((x, y) => spike(x, y, false)),
+    spikeC: mk((x, y) => spike(x, y, true)),
+    spikeTop: mk((x, y) => ((x % 4 === 1 || x % 4 === 2) && (y % 4 === 1 || y % 4 === 2)) ? [225,228,238] : sh([64,64,78], nz(x, y, 21))),
   };
 }
 function mzPut(o, tex, u, v, k, fog){
   const i = (((v*16) | 0) & 15)*48 + (((u*16) | 0) & 15)*3, f = 1 - k;
+  if (tex[i] === 255 && tex[i+1] === 0 && tex[i+2] === 255) return;
   mzPix[o] = 0xFF000000 | ((tex[i+2]*k + fog[2]*f) | 0) << 16 | ((tex[i+1]*k + fog[1]*f) | 0) << 8 | ((tex[i]*k + fog[0]*f) | 0);
 }
 function mzGen(n){
@@ -3794,7 +3802,7 @@ function mzBuild(lvl){
     if (dist[y][x] > dist[far[1]][far[0]] && x%2 && y%2) far = [x, y];
     [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy]) => { const nx = x+dx, ny = y+dy; if (g[ny][nx] === 0 && dist[ny][nx] < 0){ dist[ny][nx] = dist[y][x] + 1; q.push([nx, ny]); } });
   }
-  /* przeszkody: 1 = skrzynia na podłodze (przejście górą, po suficie), 2 = blok wiszący z sufitu (przejście dołem).
+  /* przeszkody: 1 = kolce na podłodze (przejście górą, po suficie), 2 = kolce wiszące z sufitu (przejście dołem).
      Zawsze ≥4 pola od siebie, od startu i mety, więc między nimi jest miejsce, żeby wejść na sufit albo zejść. */
   const ob = new Uint8Array(S*S), placed = [];
   const spotOk = (x, y) => !ob[y*S + x] && Math.abs(x - 1) + Math.abs(y - 1) >= 4 && Math.abs(x - far[0]) + Math.abs(y - far[1]) >= 4 && placed.every(([px, py]) => Math.abs(px - x) + Math.abs(py - y) >= 4);
@@ -3822,7 +3830,7 @@ function mzBuild(lvl){
     /* część rzeczy wisi przy suficie: zbierzesz je tylko z sufitu */
     items.push({x:spots[i][0] + 0.5, y:spots[i][1] + 0.5, z:Math.random() < 0.4 ? MZ_WH - 0.45 : 0.45, k, taken:false, ph:rand(0, 6)}); tot[k]++;
   }
-  /* nagroda nad każdą skrzynią: do zdobycia, gdy przejdziesz po suficie */
+  /* nagroda nad każdymi kolcami na podłodze: do zdobycia, gdy przejdziesz po suficie */
   for (let y = 1; y < S - 1; y++) for (let x = 1; x < S - 1; x++) if (ob[y*S + x] === 1){
     const k = Math.random() < 0.5 ? "c" : "d"; items.push({x:x + 0.5, y:y + 0.5, z:MZ_WH - 0.45, k, taken:false, ph:rand(0, 6)}); tot[k]++;
   }
@@ -3845,7 +3853,7 @@ function startMaze(lvl = 0, carry = false){
 }
 function mzStartLoop(){ if (!mzRaf){ mzLast = performance.now(); mzRaf = requestAnimationFrame(mzFrame); } }
 function stopMaze(){ if (mzRaf) cancelAnimationFrame(mzRaf); mzRaf = 0; Object.keys(mzKeys).forEach(k => mzKeys[k] = false); document.querySelectorAll("#mzPad button.on").forEach(b => b.classList.remove("on")); }
-/* layer: "floor" (blokują skrzynie), "ceil" (blokują wiszące bloki); ściany blokują zawsze */
+/* layer: "floor" (blokują kolce z podłogi), "ceil" (blokują kolce z sufitu); ściany blokują zawsze */
 function mzBlocked(x, y, layer, r = 0.2){
   for (const [ox, oy] of [[-r,-r],[r,-r],[-r,r],[r,r]]){
     const cx = Math.floor(x + ox), cy = Math.floor(y + oy);
@@ -3890,10 +3898,10 @@ function mzUpdate(dt){
   if (mz.act){
     mz.act = false;
     if (sp.mode === "floor"){
-      if (mzBlocked(sp.x, sp.y, "ceil", 0.25)) say("Tu nić się nie złapie!");
+      if (mzBlocked(sp.x, sp.y, "ceil", 0.25)) say("Nad głową są kolce!");
       else { sp.mode = "rise"; say("Nić! 🕸"); if (ctx) noiseSweep({dur:0.35, type:"bandpass", f0:800, f1:3200, q:2, vol:0.12}); }
     } else if (sp.mode === "ceil"){
-      if (mzBlocked(sp.x, sp.y, "floor", 0.25)) say("Pod spodem jest przeszkoda!");
+      if (mzBlocked(sp.x, sp.y, "floor", 0.25)) say("Pod spodem są kolce!");
       else { sp.mode = "fall"; sp.vz = 0; say("Zejście 🕸"); }
     }
   }
@@ -3960,12 +3968,12 @@ function mzDraw3D(cx, cy, a, eye, BW, BH){
     for (let j = mzHits.length - 1; j >= 0; j--){
       const h = mzHits[j], tin = Math.max(0.05, h.tin), k = Math.max(0.12, 1 - tin/MZ_FOGD)*(h.side ? 0.8 : 1);
       if (!h.top){
-        const zlo = h.k === 2 ? MZ_HANG : 0, zhi = h.k === 1 ? MZ_BOX : MZ_WH, tex = h.k === 0 ? T.wall : h.k === 1 ? T.crate : T.hang;
+        const zlo = h.k === 2 ? MZ_HANG : 0, zhi = h.k === 1 ? MZ_BOX : MZ_WH, tex = h.k === 0 ? T.wall : h.k === 1 ? T.spikeF : T.spikeC;
         const ya = Math.max(0, Math.ceil(hor - (zhi - eye)*scale/tin - 0.5)), yb = Math.min(BH - 1, Math.floor(hor - (zlo - eye)*scale/tin - 0.5));
-        for (let y = ya; y <= yb; y++){ const z = eye + (hor - (y + 0.5))*tin/scale; mzPut(y*BW + x, tex, h.u, z - zlo, k, fog); }
+        for (let y = ya; y <= yb; y++){ const z = eye + (hor - (y + 0.5))*tin/scale; mzPut(y*BW + x, tex, h.u, h.k ? 1 - (z - zlo)/(zhi - zlo) : z, k, fog); }
       }
       if (h.k && (h.k === 1 ? eye > MZ_BOX : eye < MZ_HANG)){
-        const zf = h.k === 1 ? MZ_BOX : MZ_HANG, tex2 = h.k === 1 ? T.crateTop : T.hangBot, tout = Math.max(h.tout, tin + 0.001);
+        const zf = h.k === 1 ? MZ_BOX : MZ_HANG, tex2 = T.spikeTop, tout = Math.max(h.tout, tin + 0.001);
         const yA = hor - (zf - eye)*scale/tout, yB = hor - (zf - eye)*scale/tin;
         const ya = Math.max(0, Math.ceil(Math.min(yA, yB) - 0.5)), yb = Math.min(BH - 1, Math.floor(Math.max(yA, yB) - 0.5));
         for (let y = ya; y <= yb; y++){
@@ -4022,9 +4030,8 @@ function mzLegs(c, BW, BH){
   const sp = mz.sp, u = Math.max(2, Math.round(BH/36)), flip = sp.mode === "ceil";
   const R = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), w, h); };
   [0.3, 0.4, 0.6, 0.7].forEach((fx, i) => {
-    const x = Math.round(BW*fx/u)*u, lift = sp.mv && Math.sin(sp.walk*9 + i*1.9) > 0.3 ? u*0.6 : 0, out = fx < 0.5 ? -u : u, col = i % 2 ? "#2B2B2B" : "#1E1E1E";
-    if (flip){ R(x, lift, u, 3*u, col); R(x + out, lift + 2*u, u, u, col); R(x, lift, u, 1, "#555"); }
-    else { R(x, BH - 3*u - lift, u, 3*u, col); R(x + out, BH - u - lift, u, u, col); R(x, BH - 3*u - lift, u, 1, "#555"); }
+    const x = Math.round(BW*fx/u)*u, lift = sp.mv && Math.sin(sp.walk*9 + i*1.9) > 0.3 ? u*0.6 : 0, col = i % 2 ? "#2B2B2B" : "#1E1E1E";
+    if (flip) R(x, lift, u, 3*u, col); else R(x, BH - 3*u - lift, u, 3*u, col);
   });
   if (sp.mode === "rise" || sp.mode === "fall") R(BW/2, 0, 1, BH*0.5, "rgba(255,255,255,.9)");
 }
